@@ -267,6 +267,11 @@ class PolicyManager(object):
             elif policy_type == 'gp':
                 from policy import GPPolicy
                 self.domainPolicies[domainString] = GPPolicy.GPPolicy(domainString, learning, self.shared_params)
+
+            elif policy_type == 'hack':
+                from policy import HackPolicy
+                self.domainPolicies[domainString] = HackPolicy.DQNPolicy(in_policy_file, out_policy_file, domainString, learning)
+
             elif policy_type == 'dqn':
                 from policy import DQNPolicy
                 self.domainPolicies[domainString] = DQNPolicy.DQNPolicy(in_policy_file, out_policy_file, domainString, learning)
