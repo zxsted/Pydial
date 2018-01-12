@@ -241,9 +241,21 @@ class DQNPolicy(Policy.Policy):
         if cfg.has_option('dqnpolicy', 'h1_size'):
             self.h1_size = cfg.getint('dqnpolicy', 'h1_size')
 
+        self.h1_drop = None
+        if cfg.has_option('dqnpolicy', 'h1_drop'):
+            self.h1_drop = cfg.getfloat('dqnpolicy', 'h1_drop')
+
         self.h2_size = 130
         if cfg.has_option('dqnpolicy', 'h2_size'):
             self.h2_size = cfg.getint('dqnpolicy', 'h2_size')
+
+        self.h2_drop = None
+        if cfg.has_option('dqnpolicy', 'h2_drop'):
+            self.h2_drop = cfg.getfloat('dqnpolicy', 'h2_drop')
+
+        self.nature_mode = None
+        if cfg.has_option('dqnpolicy', 'nature_mode'):
+            self.nature_mode = cfg.getboolean('dqnpolicy', 'nature_mode')
 
         self.training_frequency = 2
         if cfg.has_option('dqnpolicy', 'training_frequency'):
@@ -321,8 +333,15 @@ class DQNPolicy(Policy.Policy):
         if cfg.has_option('dqnpolicy_' + domainString, 'h1_size'):
             self.h1_size = cfg.getint('dqnpolicy_' + domainString, 'h1_size')
 
+        if cfg.has_option('dqnpolicy_' + domainString, 'h1_drop'):
+            self.h1_drop = cfg.getfloat('dqnpolicy_' + domainString, 'h1_drop')
+
         if cfg.has_option('dqnpolicy_' + domainString, 'h2_size'):
             self.h2_size = cfg.getint('dqnpolicy_' + domainString, 'h2_size')
+
+        if cfg.has_option('dqnpolicy_' + domainString, 'h2_drop'):
+            self.h2_drop = cfg.getfloat('dqnpolicy_' + domainString, 'h2_drop')
+
 
         if cfg.has_option('dqnpolicy_' + domainString, 'training_frequency'):
             self.training_frequency = cfg.getint('dqnpolicy_' + domainString, 'training_frequency')
@@ -367,8 +386,8 @@ class DQNPolicy(Policy.Policy):
 
         self.dqn = dqn.DeepQNetwork(self.state_dim, self.action_dim, \
                                     self.learning_rate, self.tau, action_bound, self.minibatch_size,
-                                    self.architecture, self.h1_size,
-                                    self.h2_size)
+                                    self.architecture, self.h1_size, self.h1_drop,
+                                    self.h2_size, self.h2_drop)
 
         # when all models are defined, init all variables
         # init_op = tf.global_variables_initializer()
@@ -662,9 +681,13 @@ class DQNPolicy(Policy.Policy):
             #print 'predict Q'
             #print predicted_q_value
 
-            if self.episodecount % 1 == 0:
-                # Update target networks
-                self.dqn.update_target_network()
+            if self.nature_mode is True:
+                c = int(1. / self.tau)
+                if self.episodecount % c == 0:
+                    self.dqn.copy_qnet_to_target()
+            else:
+                if self.episodecount % 1 == 0:
+                    self.dqn.update_target_network()
 
         self.savePolicyInc()  # self.out_policy_file)
 

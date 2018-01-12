@@ -20,7 +20,7 @@ class DeepQNetwork(object):
     """
     def __init__(self, state_dim, action_dim, learning_rate, tau,
                  num_actor_vars, minibatch_size=64, architecture='duel',
-                 h1_size=130, h2_size=50):
+                 h1_size=130, h1_drop=None, h2_size=50, h2_drop=None):
         # self.sess = sess
         self.s_dim = state_dim
         self.a_dim = action_dim
@@ -28,7 +28,9 @@ class DeepQNetwork(object):
         self.tau = tau
         self.architecture = architecture
         self.h1_size = h1_size
+        self.h1_drop = h1_drop
         self.h2_size = h2_size
+        self.h2_drop = h2_drop
         self.minibatch_size = minibatch_size
 
         self.qnet = self.create_ddq_network(prefix='qnet_')
@@ -43,7 +45,9 @@ class DeepQNetwork(object):
         with network.name_scope():
             network.add(
                 gl.nn.Dense(in_units=self.s_dim, units=self.h1_size, activation='relu'),
+                gl.nn.Dropout(rate=self.h1_drop),
                 gl.nn.Dense(in_units=self.h1_size, units=self.h2_size, activation='relu'),
+                gl.nn.Dropout(rate=self.h2_drop),
                 gl.nn.Dense(in_units=self.h2_size, units=self.a_dim)
             )
         network.initialize()
@@ -71,7 +75,6 @@ class DeepQNetwork(object):
         loss.backward()
         self.trainer.step(batch_size=self.minibatch_size)
 
-
     def predict(self, inputs):
         return self.qnet(nd.array(inputs)).asnumpy()
 
@@ -88,15 +91,29 @@ class DeepQNetwork(object):
         assert len(param_list_qnet) == len(param_list_target)
 
         for i in range(len(param_list_qnet)):
-            assert (param_list_target[i].name.strip('target') == \
+            assert (param_list_target[i].name.strip('target') ==
                     param_list_qnet[i].name.strip('qnet'))
-            param_list_target[i].set_data(param_list_target[i].data() * (1. - self.tau) + \
-                                          param_list_qnet[i].data() * self.tau)
+            param_list_target[i].set_data(
+                param_list_target[i].data() * (1. - self.tau) +
+                param_list_qnet[i].data() * self.tau
+            )
+
+    def copy_qnet_to_target(self):
+        param_list_qnet = []
+        param_list_target = []
+        for key, value in self.qnet.collect_params().items():
+            param_list_qnet.append(value)
+        for key, value in self.target.collect_params().items():
+            param_list_target.append(value)
+        assert len(param_list_qnet) == len(param_list_target)
+
+        for i in range(len(param_list_qnet)):
+            assert (param_list_target[i].name.strip('target') ==
+                    param_list_qnet[i].name.strip('qnet'))
+            param_list_target[i].set_data(param_list_qnet[i].data())
 
     def load_network(self, load_filename):
-        # self.saver = tf.train.Saver()
         try:
-            # self.saver.restore(self.sess, load_filename)
             self.qnet.load_params(filename=load_filename + '_qnet', ctx=mx.cpu())
             self.target.load_params(filename=load_filename + '_target', ctx=mx.cpu())
             print "Successfully loaded:", load_filename
