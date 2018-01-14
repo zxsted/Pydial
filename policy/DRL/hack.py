@@ -1,15 +1,12 @@
-"""
-Implementation of DQN -  Deep Q Network
-
-The algorithm is developed with tflearn + Tensorflow
-
-Author: Pei-Hao Su
-"""
-import tensorflow as tf
 import mxnet as mx
 import mxnet.gluon as gl
 import mxnet.ndarray as nd
 import copy
+
+print mx.gpu()
+a = nd.array([1, 2, 3], ctx=mx.gpu())
+
+CTX = mx.gpu()
 
 # ===========================
 #   Deep Q Network
@@ -32,15 +29,20 @@ class DeepQNetwork(object):
         self.h2_size = h2_size
         self.h2_drop = h2_drop
         self.minibatch_size = minibatch_size
-
+        
         self.qnet = self.create_ddq_network(prefix='qnet_')
         self.target = self.create_ddq_network(prefix='target_')
-
+        
         self.trainer = gl.Trainer(params=self.qnet.collect_params(),
                                   optimizer='adam',
                                   optimizer_params=dict(learning_rate=self.learning_rate))
 
     def create_ddq_network(self, prefix=''):
+        # print mx.gpu()
+        # a = nd.array([1, 2, 3], ctx=mx.gpu())
+        # b = nd.array([1, 5, 9], ctx=mx.gpu())
+        # print a + b
+
         network = gl.nn.Sequential(prefix=prefix)
         with network.name_scope():
             network.add(
@@ -50,7 +52,7 @@ class DeepQNetwork(object):
                 gl.nn.Dropout(rate=self.h2_drop),
                 gl.nn.Dense(in_units=self.h2_size, units=self.a_dim)
             )
-        network.initialize()
+        network.initialize(ctx=CTX)
         return network
 
     def train(self, inputs, action, sampled_q):
@@ -58,9 +60,9 @@ class DeepQNetwork(object):
         action = copy.deepcopy(action)
         sampled_q = copy.deepcopy(sampled_q)
 
-        inputs = nd.array(inputs)
-        action = nd.array(action)
-        sampled_q = nd.array(sampled_q)
+        inputs = nd.array(inputs, ctx=CTX)
+        action = nd.array(action, ctx=CTX)
+        sampled_q = nd.array(sampled_q, ctx=CTX)
         sampled_q = sampled_q.reshape(shape=(sampled_q.shape[0], ))
 
         with mx.autograd.record():
@@ -76,10 +78,10 @@ class DeepQNetwork(object):
         self.trainer.step(batch_size=self.minibatch_size)
 
     def predict(self, inputs):
-        return self.qnet(nd.array(inputs)).asnumpy()
+        return self.qnet(nd.array(inputs, ctx=CTX)).asnumpy()
 
     def predict_target(self, inputs):
-        return self.target(nd.array(inputs)).asnumpy()
+        return self.target(nd.array(inputs, ctx=CTX)).asnumpy()
 
     def update_target_network(self):
         param_list_qnet = []
@@ -104,7 +106,7 @@ class DeepQNetwork(object):
         for key, value in self.qnet.collect_params().items():
             param_list_qnet.append(value)
         for key, value in self.target.collect_params().items():
-            param_list_target.append(value)
+	    param_list_target.append(value)
         assert len(param_list_qnet) == len(param_list_target)
 
         for i in range(len(param_list_qnet)):
