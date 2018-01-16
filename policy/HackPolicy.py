@@ -54,7 +54,7 @@ import ontology.FlatOntologyManager as FlatOnt
 from DRL.replay_buffer import ReplayBuffer
 from DRL.replay_prioritised import ReplayPrioritised
 import DRL.utils as drlutils
-import DRL.hack as dqn
+import DRL.hack_madqn as dqn
 import Policy
 import SummaryAction
 from Policy import TerminalAction, TerminalState
@@ -387,7 +387,7 @@ class DQNPolicy(Policy.Policy):
         self.dqn = dqn.DeepQNetwork(self.state_dim, self.action_dim, \
                                     self.learning_rate, self.tau, action_bound, self.minibatch_size,
                                     self.architecture, self.h1_size, self.h1_drop,
-                                    self.h2_size, self.h2_drop)
+                                    self.h2_size, self.h2_drop, self.domainString)
 
         # when all models are defined, init all variables
         # init_op = tf.global_variables_initializer()

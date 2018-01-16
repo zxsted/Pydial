@@ -38,11 +38,6 @@ class DeepQNetwork(object):
                                   optimizer_params=dict(learning_rate=self.learning_rate))
 
     def create_ddq_network(self, prefix=''):
-        # print mx.gpu()
-        # a = nd.array([1, 2, 3], ctx=mx.gpu())
-        # b = nd.array([1, 5, 9], ctx=mx.gpu())
-        # print a + b
-
         network = gl.nn.Sequential(prefix=prefix)
         with network.name_scope():
             network.add(
@@ -106,7 +101,7 @@ class DeepQNetwork(object):
         for key, value in self.qnet.collect_params().items():
             param_list_qnet.append(value)
         for key, value in self.target.collect_params().items():
-	    param_list_target.append(value)
+            param_list_target.append(value)
         assert len(param_list_qnet) == len(param_list_target)
 
         for i in range(len(param_list_qnet)):
@@ -116,8 +111,8 @@ class DeepQNetwork(object):
 
     def load_network(self, load_filename):
         try:
-            self.qnet.load_params(filename=load_filename + '_qnet', ctx=mx.cpu())
-            self.target.load_params(filename=load_filename + '_target', ctx=mx.cpu())
+            self.qnet.load_params(filename=load_filename + '_qnet', ctx=CTX)
+            self.target.load_params(filename=load_filename + '_target', ctx=CTX)
             print "Successfully loaded:", load_filename
         except:
             print "Could not find old network weights"
