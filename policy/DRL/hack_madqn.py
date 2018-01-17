@@ -142,16 +142,15 @@ class DeepQNetwork(object):
         self.qnet = self.create_ddq_network(prefix='qnet_')
         self.target = self.create_ddq_network(prefix='target_')
 
-        self.trainer = gl.Trainer(params=self.qnet.collect_params(),
-                                  optimizer='adam',
+        self.trainer = gl.Trainer(params=self.qnet.collect_params(), optimizer='adam',
                                   optimizer_params=dict(learning_rate=self.learning_rate))
 
     def create_ddq_network(self, prefix=''):
         network =  MultiAgentNetwork(domain_string=self.domain_string, hidden_layers=2,
                                      local_hidden_units=(40, 20),
-                                     global_hidden_units=(self.h1_size, self.h2_size),
+                                     global_hidden_units=(self.h1_size - 50, self.h2_size),
                                      prefix=prefix)
-        network.initialize(ctx=CTX)
+        network.initialize(init=mx.initializer.Xavier(), ctx=CTX)
         return network
 
     def train(self, inputs, action, sampled_q):
@@ -192,12 +191,9 @@ class DeepQNetwork(object):
         assert len(param_list_qnet) == len(param_list_target)
 
         for i in range(len(param_list_qnet)):
-            assert (param_list_target[i].name.strip('target') ==
-                    param_list_qnet[i].name.strip('qnet'))
-            param_list_target[i].set_data(
-                param_list_target[i].data() * (1. - self.tau) +
-                param_list_qnet[i].data() * self.tau
-            )
+            assert (param_list_target[i].name.strip('target') == param_list_qnet[i].name.strip('qnet'))
+            param_list_target[i].set_data(param_list_target[i].data() * (1. - self.tau) +
+                                          param_list_qnet[i].data() * self.tau)
 
     def copy_qnet_to_target(self):
         param_list_qnet = []
@@ -209,16 +205,13 @@ class DeepQNetwork(object):
         assert len(param_list_qnet) == len(param_list_target)
 
         for i in range(len(param_list_qnet)):
-            assert (param_list_target[i].name.strip('target') ==
-                    param_list_qnet[i].name.strip('qnet'))
+            assert param_list_target[i].name.strip('target') == param_list_qnet[i].name.strip('qnet')
             param_list_target[i].set_data(param_list_qnet[i].data())
 
     def load_network(self, load_filename):
         try:
-            self.qnet.load_params(filename=load_filename + '_qnet',
-                                  ctx=CTX)
-            self.target.load_params(filename=load_filename + '_target',
-                                    ctx=CTX)
+            self.qnet.load_params(filename=load_filename + '_qnet', ctx=CTX)
+            self.target.load_params(filename=load_filename + '_target', ctx=CTX)
             print "Successfully loaded:", load_filename
         except:
             print "Could not find old network weights"
