@@ -257,6 +257,30 @@ class DQNPolicy(Policy.Policy):
         if cfg.has_option('dqnpolicy', 'nature_mode'):
             self.nature_mode = cfg.getboolean('dqnpolicy', 'nature_mode')
 
+        self.madqn_hidden_layers = None
+        if cfg.has_option('dqnpolicy', 'madqn_hidden_layers'):
+            self.nature_mode = cfg.getint('dqnpolicy', 'madqn_hidden_layers')
+
+        self.madqn_local_hidden_units = None
+        if cfg.has_option('dqnpolicy', 'madqn_local_hidden_units'):
+            self.madqn_local_hidden_units = cfg.get('dqnpolicy', 'madqn_local_hidden_units')
+            self.madqn_local_hidden_units = eval(self.madqn_local_hidden_units)
+
+        self.madqn_local_dropouts = None
+        if cfg.has_option('dqnpolicy', 'madqn_local_dropouts'):
+            self.madqn_local_dropouts = cfg.get('dqnpolicy', 'madqn_local_dropouts')
+            self.madqn_local_dropouts = eval(self.madqn_local_dropouts)
+
+        self.madqn_global_hidden_units = None
+        if cfg.has_option('dqnpolicy', 'madqn_global_hidden_units'):
+            self.madqn_global_hidden_units = cfg.get('dqnpolicy', 'madqn_global_hidden_units')
+            self.madqn_global_hidden_units = eval(self.madqn_global_hidden_units)
+
+        self.madqn_global_dropouts = None
+        if cfg.has_option('dqnpolicy', 'madqn_global_dropouts'):
+            self.madqn_global_dropouts = cfg.get('dqnpolicy', 'madqn_global_dropouts')
+            self.madqn_global_dropouts = eval(self.madqn_global_dropouts)
+
         self.training_frequency = 2
         if cfg.has_option('dqnpolicy', 'training_frequency'):
             self.training_frequency = cfg.getint('dqnpolicy', 'training_frequency')
@@ -383,11 +407,14 @@ class DQNPolicy(Policy.Policy):
         self.action_dim = len(self.summaryaction.action_names)
         action_bound = len(self.summaryaction.action_names)
         self.stats = [0 for _ in range(self.action_dim)]
-
+        
         self.dqn = dqn.DeepQNetwork(self.state_dim, self.action_dim, \
                                     self.learning_rate, self.tau, action_bound, self.minibatch_size,
                                     self.architecture, self.h1_size, self.h1_drop,
-                                    self.h2_size, self.h2_drop, self.domainString)
+                                    self.h2_size, self.h2_drop, self.domainString,
+                                    self.madqn_hidden_layers,
+                                    self.madqn_local_hidden_units, self.madqn_local_dropouts,
+                                    self.madqn_global_hidden_units, self.madqn_global_dropouts)
 
         # when all models are defined, init all variables
         # init_op = tf.global_variables_initializer()
