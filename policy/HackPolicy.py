@@ -281,6 +281,10 @@ class DQNPolicy(Policy.Policy):
             self.madqn_global_dropouts = cfg.get('dqnpolicy', 'madqn_global_dropouts')
             self.madqn_global_dropouts = eval(self.madqn_global_dropouts)
 
+        self.madqn_private_rate = None
+        if cfg.has_option('dqnpolicy', 'madqn_private_rate'):
+            self.madqn_private_rate= cfg.getfloat('dqnpolicy', 'madqn_private_rate')
+
         self.training_frequency = 2
         if cfg.has_option('dqnpolicy', 'training_frequency'):
             self.training_frequency = cfg.getint('dqnpolicy', 'training_frequency')
@@ -414,7 +418,8 @@ class DQNPolicy(Policy.Policy):
                                     self.h2_size, self.h2_drop, self.domainString,
                                     self.madqn_hidden_layers,
                                     self.madqn_local_hidden_units, self.madqn_local_dropouts,
-                                    self.madqn_global_hidden_units, self.madqn_global_dropouts)
+                                    self.madqn_global_hidden_units, self.madqn_global_dropouts,
+                                    self.madqn_private_rate)
 
         # when all models are defined, init all variables
         # init_op = tf.global_variables_initializer()

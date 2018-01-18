@@ -3,17 +3,17 @@ import mxnet.gluon as gl
 import mxnet.ndarray as nd
 import copy
 
-# print mx.gpu()
-# a = nd.array([1, 2, 3], ctx=mx.gpu())
+print mx.gpu()
+a = nd.array([1, 2, 3], ctx=mx.gpu())
 # b = nd.array([7, 8, 9], ctx=mx.gpu())
 # print a + b
 
-CTX = mx.cpu()
+CTX = mx.gpu()
 
 
 class MultiAgentNetwork(gl.nn.Block):
     def __init__(self, domain_string, hidden_layers, local_hidden_units, local_dropouts,
-                 global_hidden_units, global_dropouts, **kwargs):
+                 global_hidden_units, global_dropouts, private_rate, **kwargs):
         gl.nn.Block.__init__(self, **kwargs)
 
         self.domain_string = domain_string
@@ -46,6 +46,7 @@ class MultiAgentNetwork(gl.nn.Block):
         self.local_dropouts = local_dropouts
         self.global_hidden_units = global_hidden_units
         self.global_dropouts = global_dropouts
+        self.private_rate = private_rate
 
         with self.name_scope():
             self.input_trans = {}
@@ -58,6 +59,7 @@ class MultiAgentNetwork(gl.nn.Block):
             self.register_child(self.input_trans['global'])
 
             self.local_share_trans = []
+            self.private = []
             self.global_trans = []
             self.local2local_comm = []
             self.local2global_comm = []
@@ -80,6 +82,12 @@ class MultiAgentNetwork(gl.nn.Block):
                 self.register_child(self.local2local_comm[-1])
                 self.register_child(self.local2global_comm[-1])
                 self.register_child(self.global2local_comm[-1])
+
+                # self.private.append([])
+                # for j in range(len(self.slots)):
+                #     self.private[-1].append(gl.nn.Dense(in_units=self.local_hidden_units[i],
+                #                                         units=self.local_hidden_units[i + 1], activation='relu'))
+                #     self.register_child(self.private[-1][-1])
                 
             for i in range(self.hidden_layers):
                 self.local_drop_op.append(gl.nn.Dropout(self.local_dropouts[i]))
@@ -95,6 +103,7 @@ class MultiAgentNetwork(gl.nn.Block):
             self.register_child(self.output_trans[-1])
 
     def forward(self, input_vec):
+        # get inputs for every slot(including global)
         inputs = {}
         for slot in self.slots:
             inputs[slot] = input_vec[:, self.slot_dimension[slot][0]:self.slot_dimension[slot][1]]
@@ -103,21 +112,26 @@ class MultiAgentNetwork(gl.nn.Block):
             input_global.append(input_vec[:, seg[0]:seg[1]])
         inputs['global'] = nd.concat(*input_global, dim=1)
 
+        # inputs -> first_hidden_layer
         layer = [[], ]
         for slot in self.slots:
             layer[0].append(self.input_trans[slot](inputs[slot]))
         layer[0].append(self.input_trans['global'](inputs['global']))
 
+        # hidden_layers
         for i in range(self.hidden_layers - 1):
+            # dropout
             for j in range(len(self.slots)):
                 layer[i][j] = self.local_drop_op[i](layer[i][j])
             layer[i][-1] = self.global_drop_op[i](layer[i][-1])
-                   
+
+            # to next hidden layer
             layer.append([])
             for j in range(len(self.slots)):
                 layer[i + 1].append(self.local_share_trans[i](layer[i][j]))
             layer[i + 1].append(self.global_trans[i](layer[i][-1]))
 
+            # communication
             for j in range(len(self.slots)):
                 for k in range(len(self.slots)):
                     if j != k:
@@ -126,10 +140,12 @@ class MultiAgentNetwork(gl.nn.Block):
             for j in range(len(self.slots)):
                 layer[i + 1][j] = layer[i + 1][j] + self.global2local_comm[i](layer[i][-1])
 
+        # dropout of last hidden layer
         for j in range(len(self.slots)):
             layer[-1][j] = self.local_drop_op[-1](layer[-1][j])
         layer[-1][-1] = self.global_drop_op[-1](layer[-1][-1])
 
+        # last_hidden_layer -> outputs
         outputs = []
         for i in range(len(self.slots) + 1):
             outputs.append(self.output_trans[i](layer[-1][i]))
@@ -148,7 +164,7 @@ class DeepQNetwork(object):
                  num_actor_vars, minibatch_size=64, architecture='duel',
                  h1_size=130, h1_drop=None, h2_size=50, h2_drop=None, domain_string=None,
                  hidden_layers=None, local_hidden_units=None, local_dropouts=None,
-                 global_hidden_units=None, global_dropouts=None):
+                 global_hidden_units=None, global_dropouts=None,private_rate=None):
         # self.sess = sess
         self.domain_string = domain_string
         self.s_dim = state_dim
@@ -166,6 +182,7 @@ class DeepQNetwork(object):
         self.global_hidden_units = global_hidden_units
         self.global_dropouts = global_dropouts
         self.minibatch_size = minibatch_size
+        self.private_rate = private_rate
 
         self.qnet = self.create_ddq_network(prefix='qnet_')
         self.target = self.create_ddq_network(prefix='target_')
@@ -174,12 +191,13 @@ class DeepQNetwork(object):
                                   optimizer_params=dict(learning_rate=self.learning_rate))
 
     def create_ddq_network(self, prefix=''):
-        network =  MultiAgentNetwork(domain_string=self.domain_string, hidden_layers=2,
-                                     local_hidden_units=self.local_hidden_units,
-                                     local_dropouts = self.local_dropouts,
-                                     global_hidden_units=self.global_hidden_units,
-                                     global_dropouts = self.local_dropouts,
-                                     prefix=prefix)
+        network = MultiAgentNetwork(domain_string=self.domain_string, hidden_layers=2,
+                                    local_hidden_units=self.local_hidden_units,
+                                    local_dropouts=self.local_dropouts,
+                                    global_hidden_units=self.global_hidden_units,
+                                    global_dropouts=self.local_dropouts,
+                                    private_rate=self.private_rate,
+                                    prefix=prefix)
         network.initialize(init=mx.initializer.Xavier(), ctx=CTX)
         return network
 
@@ -242,6 +260,7 @@ class DeepQNetwork(object):
         try:
             self.qnet.load_params(filename=load_filename + '_qnet', ctx=CTX)
             self.target.load_params(filename=load_filename + '_target', ctx=CTX)
+            self.trainer.load_states(fname=load_filename + '_trainer')
             print "Successfully loaded:", load_filename
         except:
             print "Could not find old network weights"
@@ -251,3 +270,4 @@ class DeepQNetwork(object):
         print 'Saving deepq-network...'
         self.qnet.save_params(filename=save_filename + '_qnet')
         self.target.save_params(filename=save_filename + '_target')
+        self.trainer.save_states(fname=save_filename + '_trainer')

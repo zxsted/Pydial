@@ -86,7 +86,8 @@ class DeepQNetwork(object):
         # Define loss and optimization Op
         self.diff = self.sampled_q - self.pred_q
         self.loss = tf.reduce_mean(self.clipped_error(self.diff), name='loss')
-
+        
+        print 'New Trainer Defined.'
         self.optimizer = tf.train.AdamOptimizer(self.learning_rate)
         self.optimize = self.optimizer.minimize(self.loss)
 
