@@ -259,7 +259,7 @@ class DQNPolicy(Policy.Policy):
 
         self.madqn_hidden_layers = None
         if cfg.has_option('dqnpolicy', 'madqn_hidden_layers'):
-            self.nature_mode = cfg.getint('dqnpolicy', 'madqn_hidden_layers')
+            self.madqn_hidden_layers = cfg.getint('dqnpolicy', 'madqn_hidden_layers')
 
         self.madqn_local_hidden_units = None
         if cfg.has_option('dqnpolicy', 'madqn_local_hidden_units'):
@@ -283,7 +283,7 @@ class DQNPolicy(Policy.Policy):
 
         self.madqn_private_rate = None
         if cfg.has_option('dqnpolicy', 'madqn_private_rate'):
-            self.madqn_private_rate= cfg.getfloat('dqnpolicy', 'madqn_private_rate')
+            self.madqn_private_rate = cfg.getfloat('dqnpolicy', 'madqn_private_rate')
 
         self.training_frequency = 2
         if cfg.has_option('dqnpolicy', 'training_frequency'):

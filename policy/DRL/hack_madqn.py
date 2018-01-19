@@ -42,6 +42,7 @@ class MultiAgentNetwork(gl.nn.Block):
             raise ValueError
 
         self.hidden_layers = hidden_layers
+        print 'hidden_layers:', self.hidden_layers
         self.local_hidden_units = local_hidden_units
         self.local_dropouts = local_dropouts
         self.global_hidden_units = global_hidden_units
@@ -145,6 +146,13 @@ class MultiAgentNetwork(gl.nn.Block):
             layer[-1][j] = self.local_drop_op[-1](layer[-1][j])
         layer[-1][-1] = self.global_drop_op[-1](layer[-1][-1])
 
+        # print '------------------------------------------------------------------------------------------'
+        # for i in range(self.hidden_layers):
+        #     for u in layer[i]:
+        #         print u.shape,
+        #     print ''
+        # print '------------------------------------------------------------------------------------------'
+
         # last_hidden_layer -> outputs
         outputs = []
         for i in range(len(self.slots) + 1):
@@ -191,14 +199,15 @@ class DeepQNetwork(object):
                                   optimizer_params=dict(learning_rate=self.learning_rate))
 
     def create_ddq_network(self, prefix=''):
-        network = MultiAgentNetwork(domain_string=self.domain_string, hidden_layers=2,
+        network = MultiAgentNetwork(domain_string=self.domain_string,
+                                    hidden_layers=self.hidden_layers,
                                     local_hidden_units=self.local_hidden_units,
                                     local_dropouts=self.local_dropouts,
                                     global_hidden_units=self.global_hidden_units,
                                     global_dropouts=self.local_dropouts,
                                     private_rate=self.private_rate,
                                     prefix=prefix)
-        network.initialize(init=mx.initializer.Xavier(), ctx=CTX)
+        network.initialize(ctx=CTX)
         return network
 
     def train(self, inputs, action, sampled_q):
