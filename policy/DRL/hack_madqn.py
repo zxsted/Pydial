@@ -122,8 +122,10 @@ class MultiAgentNetwork(gl.nn.Block):
         # hidden_layers
         for i in range(self.hidden_layers - 1):
             # dropout
+            drop_vec_local = nd.ones_like(layer[i][0])
+            drop_vec_local = self.local_drop_op[i](drop_vec_local)
             for j in range(len(self.slots)):
-                layer[i][j] = self.local_drop_op[i](layer[i][j])
+                layer[i][j] = layer[i][j] * drop_vec_local
             layer[i][-1] = self.global_drop_op[i](layer[i][-1])
 
             # to next hidden layer
