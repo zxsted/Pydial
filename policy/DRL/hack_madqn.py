@@ -268,11 +268,24 @@ class DeepQNetwork(object):
     def load_network(self, load_filename):
         try:
             self.qnet.load_params(filename=load_filename + '_qnet', ctx=CTX)
-            self.target.load_params(filename=load_filename + '_target', ctx=CTX)
-            self.trainer.load_states(fname=load_filename + '_trainer')
-            print "Successfully loaded:", load_filename
+            print "Successfully loaded:", load_filename + '_qnet'
         except:
-            print "Could not find old network weights"
+            print "Could not find old network weights(qnet)"
+            print load_filename
+
+        try:
+            self.target.load_params(filename=load_filename + '_target', ctx=CTX)
+            print "Successfully loaded:", load_filename + '_target'
+        except:
+            print "Could not find old network weights(target)"
+            print load_filename
+
+        try:
+            self.trainer.step(1, ignore_stale_grad=True)
+            self.trainer.load_states(fname=load_filename + '_trainer')
+            print "Successfully loaded:", load_filename + '_trainer'
+        except:
+            print "Could not find old network weights(trainer)"
             print load_filename
 
     def save_network(self, save_filename):

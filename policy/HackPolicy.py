@@ -714,7 +714,7 @@ class DQNPolicy(Policy.Policy):
             #print predicted_q_value
 
             if self.nature_mode is True:
-                c = int(1. / self.tau)
+                c = int(1. / self.tau) * self.training_frequency
                 if self.episodecount % c == 0:
                     self.dqn.copy_qnet_to_target()
             else:
