@@ -11,9 +11,49 @@ a = nd.array([1, 2, 3], ctx=mx.gpu())
 CTX = mx.gpu()
 
 
+class MATransfer(gl.nn.Block):
+    def __init__(self, slots, local_in_units, local_units, local_dropout,
+                 global_in_units, global_units, global_dropout):
+        gl.nn.Block.__init__(self)
+        self.slots = slots
+        with self.name_scope():
+            self.local_share_trans = gl.nn.Dense(in_units=local_in_units, units=local_units, activation='relu')
+            self.global_trans = gl.nn.Dense(in_units=global_in_units, units=global_units, activation='relu')
+            self.local2local_comm = gl.nn.Dense(in_units=local_in_units, units=local_units, activation='relu')
+            self.local2global_comm = gl.nn.Dense(in_units=local_in_units, units=global_units, activation='relu')
+            self.global2local_comm = gl.nn.Dense(in_units=global_in_units, units=local_units, activation='relu')
+            self.local_dropout_op = gl.nn.Dropout(local_dropout)
+            self.global_dropout_op = gl.nn.Dropout(global_dropout)
+
+    def forward(self, inputs):
+        assert len(inputs) == self.slots + 1
+
+        local_drop_vec = nd.ones_like(inputs[0])
+        local_drop_vec = self.local_dropout_op(local_drop_vec)
+        for i in range(self.slots):
+            inputs[i] = inputs[i] * local_drop_vec
+        inputs[-1] = self.global_dropout_op(inputs[-1])
+
+        results = []
+
+        for i in range(self.slots):
+            results.append(self.local_share_trans(inputs[i]))
+        results.append(self.global_trans(inputs[-1]))
+
+        for i in range(self.slots):
+            for j in range(self.slots):
+                if i != j:
+                    results[j] = results[j] + self.local2local_comm(inputs[i])
+            results[-1] = results[-1] + self.local2global_comm(inputs[i])
+        for i in range(self.slots):
+            results[i] = results[i] + self.global2local_comm(inputs[-1])
+
+        return results
+
+
 class MultiAgentNetwork(gl.nn.Block):
     def __init__(self, domain_string, hidden_layers, local_hidden_units, local_dropouts,
-                 global_hidden_units, global_dropouts, private_rate, **kwargs):
+                 global_hidden_units, global_dropouts, private_rate, sort_input_vec, **kwargs):
         gl.nn.Block.__init__(self, **kwargs)
 
         self.domain_string = domain_string
@@ -48,53 +88,45 @@ class MultiAgentNetwork(gl.nn.Block):
         self.global_hidden_units = global_hidden_units
         self.global_dropouts = global_dropouts
         self.private_rate = private_rate
+        self.sort_input_vec = sort_input_vec
 
         with self.name_scope():
-            self.input_trans = {}
-            for slot in self.slots:
-                in_units = self.slot_dimension[slot][1] - self.slot_dimension[slot][0]
-                self.input_trans[slot] = gl.nn.Dense(in_units=in_units, units=self.local_hidden_units[0], activation='relu')
-                self.register_child(self.input_trans[slot])
-            self.input_trans['global'] = \
-                gl.nn.Dense(in_units=self.global_input_dimension, units=self.global_hidden_units[0], activation='relu')
-            self.register_child(self.input_trans['global'])
+            if self.sort_input_vec is False:
+                self.input_trans = {}
+                for slot in self.slots:
+                    in_units = self.slot_dimension[slot][1] - self.slot_dimension[slot][0]
+                    self.input_trans[slot] = \
+                        gl.nn.Dense(in_units=in_units, units=self.local_hidden_units[0], activation='relu')
+                    self.register_child(self.input_trans[slot])
+                self.input_trans['global'] = \
+                    gl.nn.Dense(in_units=self.global_input_dimension, units=self.global_hidden_units[0], activation='relu')
+                self.register_child(self.input_trans['global'])
+            else:
+                self.input_trans = MATransfer(
+                    slots=len(self.slots),
+                    local_in_units=22,
+                    local_units=self.local_hidden_units[0],
+                    local_dropout=0.,
+                    global_in_units=self.global_input_dimension,
+                    global_units=self.global_hidden_units[0],
+                    global_dropout=0.
+                )
 
-            self.local_share_trans = []
-            self.private = []
-            self.global_trans = []
-            self.local2local_comm = []
-            self.local2global_comm = []
-            self.global2local_comm = []
-            self.local_drop_op = []
-            self.global_drop_op = []
+            self.ma_trans = []
             for i in range(self.hidden_layers - 1):
-                self.local_share_trans.append(gl.nn.Dense(in_units=self.local_hidden_units[i],
-                                                          units=self.local_hidden_units[i + 1], activation='relu'))
-                self.global_trans.append(gl.nn.Dense(in_units=self.global_hidden_units[i],
-                                                     units=self.global_hidden_units[i + 1], activation='relu'))
-                self.local2local_comm.append(gl.nn.Dense(in_units=self.local_hidden_units[i],
-                                                         units=self.local_hidden_units[i + 1], activation='relu'))
-                self.local2global_comm.append(gl.nn.Dense(in_units=self.local_hidden_units[i],
-                                                          units=self.global_hidden_units[i + 1], activation='relu'))
-                self.global2local_comm.append(gl.nn.Dense(in_units=self.global_hidden_units[i],
-                                                          units=self.local_hidden_units[i + 1], activation='relu'))
-                self.register_child(self.local_share_trans[-1])
-                self.register_child(self.global_trans[-1])
-                self.register_child(self.local2local_comm[-1])
-                self.register_child(self.local2global_comm[-1])
-                self.register_child(self.global2local_comm[-1])
+                self.ma_trans.append(MATransfer(
+                    slots=len(self.slots),
+                    local_in_units=self.local_hidden_units[i],
+                    local_units=self.local_hidden_units[i + 1],
+                    local_dropout=self.local_dropouts[i],
+                    global_in_units=self.global_hidden_units[i],
+                    global_units=self.global_hidden_units[i + 1],
+                    global_dropout=self.global_dropouts[i]
+                ))
+                self.register_child(self.ma_trans[-1])
 
-                # self.private.append([])
-                # for j in range(len(self.slots)):
-                #     self.private[-1].append(gl.nn.Dense(in_units=self.local_hidden_units[i],
-                #                                         units=self.local_hidden_units[i + 1], activation='relu'))
-                #     self.register_child(self.private[-1][-1])
-                
-            for i in range(self.hidden_layers):
-                self.local_drop_op.append(gl.nn.Dropout(self.local_dropouts[i]))
-                self.global_drop_op.append(gl.nn.Dropout(self.global_dropouts[i]))
-                self.register_child(self.local_drop_op[-1])
-                self.register_child(self.global_drop_op[-1])
+            self.local_out_drop_op = gl.nn.Dropout(self.local_dropouts[-1])
+            self.global_out_drop_op = gl.nn.Dropout(self.global_dropouts[-1])
 
             self.output_trans = []
             for i in range(len(self.slots)):
@@ -102,6 +134,8 @@ class MultiAgentNetwork(gl.nn.Block):
                 self.register_child(self.output_trans[-1])
             self.output_trans.append(gl.nn.Dense(in_units=self.global_hidden_units[-1], units=7))
             self.register_child(self.output_trans[-1])
+        # for key, value in self.collect_params().items():
+        #     print key, value
 
     def forward(self, input_vec):
         # get inputs for every slot(including global)
@@ -113,40 +147,33 @@ class MultiAgentNetwork(gl.nn.Block):
             input_global.append(input_vec[:, seg[0]:seg[1]])
         inputs['global'] = nd.concat(*input_global, dim=1)
 
+        layer = []
         # inputs -> first_hidden_layer
-        layer = [[], ]
-        for slot in self.slots:
-            layer[0].append(self.input_trans[slot](inputs[slot]))
-        layer[0].append(self.input_trans['global'](inputs['global']))
+        if self.sort_input_vec is False:
+            layer.append([])
+            for slot in self.slots:
+                layer[0].append(self.input_trans[slot](inputs[slot]))
+            layer[0].append(self.input_trans['global'](inputs['global']))
+        else:
+            sorted_inputs = []
+            for slot in self.slots:
+                tmp = inputs[slot][:, :-2].sort(is_ascend=False)
+                if tmp.shape[1] < 20:
+                    tmp = nd.concat(tmp, nd.zeros((tmp.shape[0], 20 - tmp.shape[1]), ctx=CTX), dim=1)
+                else:
+                    raise ValueError
+                sorted_inputs.append(nd.concat(tmp, inputs[slot][:, -2:], dim=1))
+            sorted_inputs.append(inputs['global'])
+            layer.append(self.input_trans(sorted_inputs))
 
         # hidden_layers
         for i in range(self.hidden_layers - 1):
-            # dropout
-            drop_vec_local = nd.ones_like(layer[i][0])
-            drop_vec_local = self.local_drop_op[i](drop_vec_local)
-            for j in range(len(self.slots)):
-                layer[i][j] = layer[i][j] * drop_vec_local
-            layer[i][-1] = self.global_drop_op[i](layer[i][-1])
-
-            # to next hidden layer
-            layer.append([])
-            for j in range(len(self.slots)):
-                layer[i + 1].append(self.local_share_trans[i](layer[i][j]))
-            layer[i + 1].append(self.global_trans[i](layer[i][-1]))
-
-            # communication
-            for j in range(len(self.slots)):
-                for k in range(len(self.slots)):
-                    if j != k:
-                        layer[i + 1][k] = layer[i + 1][k] + self.local2local_comm[i](layer[i][j])
-                layer[i + 1][-1] = layer[i + 1][-1] + self.local2global_comm[i](layer[i][j])
-            for j in range(len(self.slots)):
-                layer[i + 1][j] = layer[i + 1][j] + self.global2local_comm[i](layer[i][-1])
+            layer.append(self.ma_trans[i](layer[i]))
 
         # dropout of last hidden layer
         for j in range(len(self.slots)):
-            layer[-1][j] = self.local_drop_op[-1](layer[-1][j])
-        layer[-1][-1] = self.global_drop_op[-1](layer[-1][-1])
+            layer[-1][j] = self.local_out_drop_op(layer[-1][j])
+        layer[-1][-1] = self.global_out_drop_op(layer[-1][-1])
 
         # print '------------------------------------------------------------------------------------------'
         # for i in range(self.hidden_layers):
@@ -174,7 +201,8 @@ class DeepQNetwork(object):
                  num_actor_vars, minibatch_size=64, architecture='duel',
                  h1_size=130, h1_drop=None, h2_size=50, h2_drop=None, domain_string=None,
                  hidden_layers=None, local_hidden_units=None, local_dropouts=None,
-                 global_hidden_units=None, global_dropouts=None,private_rate=None):
+                 global_hidden_units=None, global_dropouts=None, private_rate=None,
+                 sort_input_vec=None):
         # self.sess = sess
         self.domain_string = domain_string
         self.s_dim = state_dim
@@ -193,6 +221,7 @@ class DeepQNetwork(object):
         self.global_dropouts = global_dropouts
         self.minibatch_size = minibatch_size
         self.private_rate = private_rate
+        self.sort_input_vec = sort_input_vec
 
         self.qnet = self.create_ddq_network(prefix='qnet_')
         self.target = self.create_ddq_network(prefix='target_')
@@ -208,6 +237,7 @@ class DeepQNetwork(object):
                                     global_hidden_units=self.global_hidden_units,
                                     global_dropouts=self.local_dropouts,
                                     private_rate=self.private_rate,
+                                    sort_input_vec=self.sort_input_vec,
                                     prefix=prefix)
         network.initialize(ctx=CTX)
         return network
