@@ -22,7 +22,13 @@ def submit(seed):
         complete = False
         error = False
         while (complete or error) is False:
-            result_file = open(sys.argv[1] + '_log/LOG' + str(seed), 'r')
+            while True:
+                try:
+                    result_file = open(sys.argv[1] + '_log/LOG' + str(seed), 'r')
+                except:
+                    continue
+                finally:
+                    break
             for u in result_file:
                 if u.find('Training complete') != -1:
                     complete = True
