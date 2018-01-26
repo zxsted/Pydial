@@ -1,0 +1,16 @@
+RESULTS:: 17:46:04: root                                   pydial.py <train_command>791 :  List of domains: Laptops11
+RESULTS:: 17:46:04: root                                      pydial.py <trainBatch>409 :  *** Training Iteration env1-LAP-tau_sort_4020_0100_250100_0100-seed3-00.0->env1-LAP-tau_sort_4020_0100_250100_0100-seed3-00.1: iter=0, error-rate=0, num-dialogs=1000 ***
+RESULTS:: 19:27:20: root                               EvaluationManager.py <_prstr>179 :  Results for domain: Laptops11 --evaluated by: objective success evaluator
+RESULTS:: 19:27:20: root                               EvaluationManager.py <_prstr>179 :  # of dialogues  = 1000
+RESULTS:: 19:27:20: root                               EvaluationManager.py <_prstr>179 :  Average reward  = 5.53 +- 0.66
+RESULTS:: 19:27:20: root                               EvaluationManager.py <_prstr>179 :  Average success = 72.80 +- 2.76
+RESULTS:: 19:27:20: root                               EvaluationManager.py <_prstr>179 :  Average turns   = 9.03 +- 0.26
+RESULTS:: 19:27:20: root                                   pydial.py <setEvalConfig>470 :  *** Evaluating env1-LAP-tau_sort_4020_0100_250100_0100-seed3-00.1: error-rate=0 num-dialogs=500 ***
+RESULTS:: 19:58:19: root                               EvaluationManager.py <_prstr>179 :  Results for domain: Laptops11 --evaluated by: objective success evaluator
+RESULTS:: 19:58:19: root                               EvaluationManager.py <_prstr>179 :  # of dialogues  = 500
+RESULTS:: 19:58:19: root                               EvaluationManager.py <_prstr>179 :  Average reward  = 4.86 +- 0.92
+RESULTS:: 19:58:19: root                               EvaluationManager.py <_prstr>179 :  Average success = 58.80 +- 4.32
+RESULTS:: 19:58:19: root                               EvaluationManager.py <_prstr>179 :  Average turns   = 6.90 +- 0.18
+RESULTS:: 19:58:19: root                                   pydial.py <train_command>791 :  List of domains: Laptops11
+RESULTS:: 19:58:19: root                                      pydial.py <trainBatch>409 :  *** Training Iteration env1-LAP-tau_sort_4020_0100_250100_0100-seed3-00.1->env1-LAP-tau_sort_4020_0100_250100_0100-seed3-00.2: iter=1, error-rate=0, num-dialogs=1000 ***
+ERROR  :: 21:07:31: root                      DataBaseSQLite.py <entity_by_features>135 :  sql error disk I/O error
