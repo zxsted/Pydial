@@ -53,7 +53,8 @@ class MATransfer(gl.nn.Block):
 
 class MultiAgentNetwork(gl.nn.Block):
     def __init__(self, domain_string, hidden_layers, local_hidden_units, local_dropouts,
-                 global_hidden_units, global_dropouts, private_rate, sort_input_vec, share_last_layer, **kwargs):
+                 global_hidden_units, global_dropouts, private_rate, sort_input_vec,
+                 share_last_layer, recurrent_mode, **kwargs):
         gl.nn.Block.__init__(self, **kwargs)
 
         self.domain_string = domain_string
@@ -90,6 +91,7 @@ class MultiAgentNetwork(gl.nn.Block):
         self.private_rate = private_rate
         self.sort_input_vec = sort_input_vec
         self.share_last_layer = share_last_layer
+        self.recurrent_mode = recurrent_mode
 
         with self.name_scope():
             if self.sort_input_vec is False:
@@ -114,19 +116,36 @@ class MultiAgentNetwork(gl.nn.Block):
                     activation='relu'
                 )
 
-            self.ma_trans = []
-            for i in range(self.hidden_layers - 1):
-                self.ma_trans.append(MATransfer(
-                    slots=len(self.slots),
-                    local_in_units=self.local_hidden_units[i],
-                    local_units=self.local_hidden_units[i + 1],
-                    local_dropout=self.local_dropouts[i],
-                    global_in_units=self.global_hidden_units[i],
-                    global_units=self.global_hidden_units[i + 1],
-                    global_dropout=self.global_dropouts[i],
-                    activation='relu'
-                ))
-                self.register_child(self.ma_trans[-1])
+            if self.recurrent_mode is False:
+                self.ma_trans = []
+                for i in range(self.hidden_layers - 1):
+                    self.ma_trans.append(MATransfer(
+                        slots=len(self.slots),
+                        local_in_units=self.local_hidden_units[i],
+                        local_units=self.local_hidden_units[i + 1],
+                        local_dropout=self.local_dropouts[i],
+                        global_in_units=self.global_hidden_units[i],
+                        global_units=self.global_hidden_units[i + 1],
+                        global_dropout=self.global_dropouts[i],
+                        activation='relu'
+                    ))
+                    self.register_child(self.ma_trans[-1])
+            else:
+                assert self.local_hidden_units == (self.local_hidden_units[0], ) * self.hidden_layers
+                assert self.local_dropouts == (self.local_dropouts[0], ) * self.hidden_layers
+                assert self.global_hidden_units == (self.global_hidden_units[0], ) * self.hidden_layers
+                assert self.global_dropouts == (self.global_dropouts[0], ) * self.hidden_layers
+
+                self.ma_trans = MATransfer(
+                        slots=len(self.slots),
+                        local_in_units=self.local_hidden_units[0],
+                        local_units=self.local_hidden_units[0],
+                        local_dropout=self.local_dropouts[0],
+                        global_in_units=self.global_hidden_units[0],
+                        global_units=self.global_hidden_units[0],
+                        global_dropout=self.global_dropouts[0],
+                        activation='relu'
+                )
 
             if self.share_last_layer is False:
                 self.local_out_drop_op = gl.nn.Dropout(self.local_dropouts[-1])
@@ -185,7 +204,10 @@ class MultiAgentNetwork(gl.nn.Block):
 
         # hidden_layers
         for i in range(self.hidden_layers - 1):
-            layer.append(self.ma_trans[i](layer[i]))
+            if self.recurrent_mode is False:
+                layer.append(self.ma_trans[i](layer[i]))
+            else:
+                layer.append(self.ma_trans(layer[i]))
 
         if self.share_last_layer is False:
             # dropout of last hidden layer
@@ -215,7 +237,7 @@ class DeepQNetwork(object):
                  h1_size=130, h1_drop=None, h2_size=50, h2_drop=None, domain_string=None,
                  hidden_layers=None, local_hidden_units=None, local_dropouts=None,
                  global_hidden_units=None, global_dropouts=None, private_rate=None,
-                 sort_input_vec=None, share_last_layer=None):
+                 sort_input_vec=None, share_last_layer=None, recurrent_mode=None):
         # self.sess = sess
         self.domain_string = domain_string
         self.s_dim = state_dim
@@ -236,6 +258,7 @@ class DeepQNetwork(object):
         self.private_rate = private_rate
         self.sort_input_vec = sort_input_vec
         self.share_last_layer = share_last_layer
+        self.recurrent_mode = recurrent_mode
 
         self.qnet = self.create_ddq_network(prefix='qnet_')
         self.target = self.create_ddq_network(prefix='target_')
@@ -253,6 +276,7 @@ class DeepQNetwork(object):
                                     private_rate=self.private_rate,
                                     sort_input_vec=self.sort_input_vec,
                                     share_last_layer=self.share_last_layer,
+                                    recurrent_mode=self.recurrent_mode,
                                     prefix=prefix)
         network.initialize(ctx=CTX)
         return network
