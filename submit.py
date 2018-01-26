@@ -18,24 +18,22 @@ def submit(seed):
                   'config/other_configs/' + sys.argv[1] + '.cfg --seed=' + str(seed) + '\n')
     while True:
         os.system('sbatch -p cpuq -n 2 -o ' + sys.argv[1] + '_log/LOG' + str(seed) + ' run' + str(seed) + '.sh')
-        result_file = open(sys.argv[1] + '_log/LOG' + str(seed), 'r')
 
         complete = False
         error = False
-        for u in result_file:
-            if u.find('Training complete') != -1:
-                complete = True
-                break
-            if u.find('I/O Error') != -1:
-                error = True
-                break
+        while (complete or error) is False:
+            result_file = open(sys.argv[1] + '_log/LOG' + str(seed), 'r')
+            for u in result_file:
+                if u.find('Training complete') != -1:
+                    complete = True
+                    break
+                if u.find('I/O Error') != -1:
+                    error = True
+                    break
         if error:
             continue
         elif complete:
             break
-        else:
-            time.sleep(10)
-
 
     print(sys.argv[1], 'seed', str(seed), 'finished')
     print(finished, 'finished')
