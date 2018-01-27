@@ -16,8 +16,10 @@ def submit(seed):
     runfile.write('#!/bin/sh\n')
     runfile.write('/mnt/speechlab/users/bwt09/packages/anaconda2/bin/python pydial.py train '
                   'config/other_configs/' + sys.argv[1] + '.cfg --seed=' + str(seed) + '\n')
+    runfile.flush()
     while True:
-        os.system('sbatch -p cpuq -n 2 -o ' + sys.argv[1] + '_log/LOG' + str(seed) + ' run' + str(seed) + '.sh')
+        os.system('sbatch -p cpuq -n 2 -o ' + sys.argv[1] + '_log/LOG' + str(seed) + ' ' + sys.argv[1] + '_log/run' + str(seed) + '.sh')
+        print('sbatch -p cpuq -n 2 -o ' + sys.argv[1] + '_log/LOG' + str(seed) + ' ' + sys.argv[1] + '_log/run' + str(seed) + '.sh')
 
         complete = False
         error = False
