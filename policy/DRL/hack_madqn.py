@@ -13,17 +13,20 @@ CTX = mx.gpu()
 
 class MATransfer(gl.nn.Block):
     def __init__(self, slots, local_in_units, local_units, local_dropout,
-                 global_in_units, global_units, global_dropout, activation):
+                 global_in_units, global_units, global_dropout, activation, use_comm=True):
         gl.nn.Block.__init__(self)
         self.slots = slots
+        self.use_comm = use_comm
         with self.name_scope():
             self.local_share_trans = gl.nn.Dense(in_units=local_in_units, units=local_units, activation=activation)
             self.global_trans = gl.nn.Dense(in_units=global_in_units, units=global_units, activation=activation)
-            self.local2local_comm = gl.nn.Dense(in_units=local_in_units, units=local_units, activation=activation)
-            self.local2global_comm = gl.nn.Dense(in_units=local_in_units, units=global_units, activation=activation)
-            self.global2local_comm = gl.nn.Dense(in_units=global_in_units, units=local_units, activation=activation)
+            if self.use_comm:
+                self.local2local_comm = gl.nn.Dense(in_units=local_in_units, units=local_units, activation=activation)
+                self.local2global_comm = gl.nn.Dense(in_units=local_in_units, units=global_units, activation=activation)
+                self.global2local_comm = gl.nn.Dense(in_units=global_in_units, units=local_units, activation=activation)
             self.local_dropout_op = gl.nn.Dropout(local_dropout)
             self.global_dropout_op = gl.nn.Dropout(global_dropout)
+        print use_comm
 
     def forward(self, inputs):
         assert len(inputs) == self.slots + 1
@@ -40,13 +43,14 @@ class MATransfer(gl.nn.Block):
             results.append(self.local_share_trans(inputs[i]))
         results.append(self.global_trans(inputs[-1]))
 
-        for i in range(self.slots):
-            for j in range(self.slots):
-                if i != j:
-                    results[j] = results[j] + self.local2local_comm(inputs[i])
-            results[-1] = results[-1] + self.local2global_comm(inputs[i])
-        for i in range(self.slots):
-            results[i] = results[i] + self.global2local_comm(inputs[-1])
+        if self.use_comm:
+            for i in range(self.slots):
+                for j in range(self.slots):
+                    if i != j:
+                        results[j] = results[j] + self.local2local_comm(inputs[i])
+                results[-1] = results[-1] + self.local2global_comm(inputs[i])
+            for i in range(self.slots):
+                results[i] = results[i] + self.global2local_comm(inputs[-1])
 
         return results
 
@@ -54,7 +58,7 @@ class MATransfer(gl.nn.Block):
 class MultiAgentNetwork(gl.nn.Block):
     def __init__(self, domain_string, hidden_layers, local_hidden_units, local_dropouts,
                  global_hidden_units, global_dropouts, private_rate, sort_input_vec,
-                 share_last_layer, recurrent_mode, **kwargs):
+                 share_last_layer, recurrent_mode, input_comm, **kwargs):
         gl.nn.Block.__init__(self, **kwargs)
 
         self.domain_string = domain_string
@@ -102,7 +106,8 @@ class MultiAgentNetwork(gl.nn.Block):
                         gl.nn.Dense(in_units=in_units, units=self.local_hidden_units[0], activation='relu')
                     self.register_child(self.input_trans[slot])
                 self.input_trans['global'] = \
-                    gl.nn.Dense(in_units=self.global_input_dimension, units=self.global_hidden_units[0], activation='relu')
+                    gl.nn.Dense(in_units=self.global_input_dimension,
+                                units=self.global_hidden_units[0], activation='relu')
                 self.register_child(self.input_trans['global'])
             else:
                 self.input_trans = MATransfer(
@@ -113,7 +118,8 @@ class MultiAgentNetwork(gl.nn.Block):
                     global_in_units=self.global_input_dimension,
                     global_units=self.global_hidden_units[0],
                     global_dropout=0.,
-                    activation='relu'
+                    activation='relu',
+                    use_comm=input_comm
                 )
 
             if self.recurrent_mode is False:
@@ -237,7 +243,8 @@ class DeepQNetwork(object):
                  h1_size=130, h1_drop=None, h2_size=50, h2_drop=None, domain_string=None,
                  hidden_layers=None, local_hidden_units=None, local_dropouts=None,
                  global_hidden_units=None, global_dropouts=None, private_rate=None,
-                 sort_input_vec=None, share_last_layer=None, recurrent_mode=None):
+                 sort_input_vec=None, share_last_layer=None, recurrent_mode=None,
+                 input_comm=None, target_explore=None):
         # self.sess = sess
         self.domain_string = domain_string
         self.s_dim = state_dim
@@ -259,6 +266,9 @@ class DeepQNetwork(object):
         self.sort_input_vec = sort_input_vec
         self.share_last_layer = share_last_layer
         self.recurrent_mode = recurrent_mode
+        self.input_comm = input_comm
+        self.target_explore = target_explore
+        # print 'target_explore:', self.target_explore
 
         self.qnet = self.create_ddq_network(prefix='qnet_')
         self.target = self.create_ddq_network(prefix='target_')
@@ -277,6 +287,7 @@ class DeepQNetwork(object):
                                     sort_input_vec=self.sort_input_vec,
                                     share_last_layer=self.share_last_layer,
                                     recurrent_mode=self.recurrent_mode,
+                                    input_comm=self.input_comm,
                                     prefix=prefix)
         network.initialize(ctx=CTX)
         return network
@@ -307,7 +318,12 @@ class DeepQNetwork(object):
         return self.qnet(nd.array(inputs, ctx=CTX)).asnumpy()
 
     def predict_target(self, inputs):
-        return self.target(nd.array(inputs, ctx=CTX)).asnumpy()
+        if self.target_explore:
+            with mx.autograd.train_mode():
+                return self.target(nd.array(inputs, ctx=CTX)).asnumpy()
+        else:
+            assert mx.autograd.is_training() == False
+            return self.target(nd.array(inputs, ctx=CTX)).asnumpy()
 
     def update_target_network(self):
         param_list_qnet = []

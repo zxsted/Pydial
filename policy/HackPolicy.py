@@ -297,6 +297,14 @@ class DQNPolicy(Policy.Policy):
         if cfg.has_option('dqnpolicy', 'madqn_recurrent_mode'):
             self.madqn_recurrent_mode = cfg.getboolean('dqnpolicy', 'madqn_recurrent_mode')
 
+        self.madqn_input_comm = True
+        if cfg.has_option('dqnpolicy', 'madqn_input_comm'):
+            self.madqn_input_comm = cfg.getboolean('dqnpolicy', 'madqn_input_comm')
+
+        self.madqn_target_explore = False
+        if cfg.has_option('dqnpolicy', 'madqn_target_explore'):
+            self.madqn_target_explore = cfg.getboolean('dqnpolicy', 'madqn_target_explore')
+
         self.training_frequency = 2
         if cfg.has_option('dqnpolicy', 'training_frequency'):
             self.training_frequency = cfg.getint('dqnpolicy', 'training_frequency')
@@ -432,7 +440,8 @@ class DQNPolicy(Policy.Policy):
                                     self.madqn_local_hidden_units, self.madqn_local_dropouts,
                                     self.madqn_global_hidden_units, self.madqn_global_dropouts,
                                     self.madqn_private_rate, self.madqn_sort_input_vec,
-                                    self.madqn_share_last_layer, self.madqn_recurrent_mode)
+                                    self.madqn_share_last_layer, self.madqn_recurrent_mode,
+                                    self.madqn_input_comm, self.madqn_target_explore)
 
         # when all models are defined, init all variables
         # init_op = tf.global_variables_initializer()
