@@ -1,0 +1,53 @@
+RESULTS:: 11:14:25: root                                   pydial.py <train_command>791 :  List of domains: Laptops11
+RESULTS:: 11:14:25: root                                      pydial.py <trainBatch>409 :  *** Training Iteration env3-LAP-tau_sort_4020_0100_250100_0100-seed0-15.0->env3-LAP-tau_sort_4020_0100_250100_0100-seed0-15.1: iter=0, error-rate=15, num-dialogs=1000 ***
+RESULTS:: 11:48:37: root                               EvaluationManager.py <_prstr>179 :  Results for domain: Laptops11 --evaluated by: objective success evaluator
+RESULTS:: 11:48:37: root                               EvaluationManager.py <_prstr>179 :  # of dialogues  = 1000
+RESULTS:: 11:48:37: root                               EvaluationManager.py <_prstr>179 :  Average reward  = 1.91 +- 0.75
+RESULTS:: 11:48:37: root                               EvaluationManager.py <_prstr>179 :  Average success = 62.40 +- 3.01
+RESULTS:: 11:48:37: root                               EvaluationManager.py <_prstr>179 :  Average turns   = 10.57 +- 0.31
+RESULTS:: 11:48:37: root                                   pydial.py <setEvalConfig>470 :  *** Evaluating env3-LAP-tau_sort_4020_0100_250100_0100-seed0-15.1: error-rate=15 num-dialogs=500 ***
+RESULTS:: 12:01:49: root                               EvaluationManager.py <_prstr>179 :  Results for domain: Laptops11 --evaluated by: objective success evaluator
+RESULTS:: 12:01:49: root                               EvaluationManager.py <_prstr>179 :  # of dialogues  = 500
+RESULTS:: 12:01:49: root                               EvaluationManager.py <_prstr>179 :  Average reward  = 6.26 +- 0.89
+RESULTS:: 12:01:49: root                               EvaluationManager.py <_prstr>179 :  Average success = 72.40 +- 3.93
+RESULTS:: 12:01:49: root                               EvaluationManager.py <_prstr>179 :  Average turns   = 8.22 +- 0.29
+RESULTS:: 12:01:49: root                                   pydial.py <train_command>791 :  List of domains: Laptops11
+RESULTS:: 12:01:49: root                                      pydial.py <trainBatch>409 :  *** Training Iteration env3-LAP-tau_sort_4020_0100_250100_0100-seed0-15.1->env3-LAP-tau_sort_4020_0100_250100_0100-seed0-15.2: iter=1, error-rate=15, num-dialogs=1000 ***
+RESULTS:: 12:35:50: root                               EvaluationManager.py <_prstr>179 :  Results for domain: Laptops11 --evaluated by: objective success evaluator
+RESULTS:: 12:35:50: root                               EvaluationManager.py <_prstr>179 :  # of dialogues  = 1000
+RESULTS:: 12:35:50: root                               EvaluationManager.py <_prstr>179 :  Average reward  = 6.23 +- 0.63
+RESULTS:: 12:35:50: root                               EvaluationManager.py <_prstr>179 :  Average success = 82.70 +- 2.35
+RESULTS:: 12:35:50: root                               EvaluationManager.py <_prstr>179 :  Average turns   = 10.31 +- 0.31
+RESULTS:: 12:35:50: root                                   pydial.py <setEvalConfig>470 :  *** Evaluating env3-LAP-tau_sort_4020_0100_250100_0100-seed0-15.2: error-rate=15 num-dialogs=500 ***
+RESULTS:: 12:49:57: root                               EvaluationManager.py <_prstr>179 :  Results for domain: Laptops11 --evaluated by: objective success evaluator
+RESULTS:: 12:49:57: root                               EvaluationManager.py <_prstr>179 :  # of dialogues  = 500
+RESULTS:: 12:49:57: root                               EvaluationManager.py <_prstr>179 :  Average reward  = 7.75 +- 0.82
+RESULTS:: 12:49:57: root                               EvaluationManager.py <_prstr>179 :  Average success = 83.00 +- 3.30
+RESULTS:: 12:49:57: root                               EvaluationManager.py <_prstr>179 :  Average turns   = 8.85 +- 0.33
+RESULTS:: 12:49:57: root                                   pydial.py <train_command>791 :  List of domains: Laptops11
+RESULTS:: 12:49:57: root                                      pydial.py <trainBatch>409 :  *** Training Iteration env3-LAP-tau_sort_4020_0100_250100_0100-seed0-15.2->env3-LAP-tau_sort_4020_0100_250100_0100-seed0-15.3: iter=2, error-rate=15, num-dialogs=1000 ***
+RESULTS:: 13:26:23: root                               EvaluationManager.py <_prstr>179 :  Results for domain: Laptops11 --evaluated by: objective success evaluator
+RESULTS:: 13:26:23: root                               EvaluationManager.py <_prstr>179 :  # of dialogues  = 1000
+RESULTS:: 13:26:23: root                               EvaluationManager.py <_prstr>179 :  Average reward  = 6.00 +- 0.65
+RESULTS:: 13:26:23: root                               EvaluationManager.py <_prstr>179 :  Average success = 84.80 +- 2.23
+RESULTS:: 13:26:23: root                               EvaluationManager.py <_prstr>179 :  Average turns   = 10.96 +- 0.34
+RESULTS:: 13:26:23: root                                   pydial.py <setEvalConfig>470 :  *** Evaluating env3-LAP-tau_sort_4020_0100_250100_0100-seed0-15.3: error-rate=15 num-dialogs=500 ***
+RESULTS:: 13:41:18: root                               EvaluationManager.py <_prstr>179 :  Results for domain: Laptops11 --evaluated by: objective success evaluator
+RESULTS:: 13:41:18: root                               EvaluationManager.py <_prstr>179 :  # of dialogues  = 500
+RESULTS:: 13:41:18: root                               EvaluationManager.py <_prstr>179 :  Average reward  = 8.38 +- 0.78
+RESULTS:: 13:41:18: root                               EvaluationManager.py <_prstr>179 :  Average success = 86.80 +- 2.97
+RESULTS:: 13:41:18: root                               EvaluationManager.py <_prstr>179 :  Average turns   = 8.98 +- 0.36
+RESULTS:: 13:41:18: root                                   pydial.py <train_command>791 :  List of domains: Laptops11
+RESULTS:: 13:41:18: root                                      pydial.py <trainBatch>409 :  *** Training Iteration env3-LAP-tau_sort_4020_0100_250100_0100-seed0-15.3->env3-LAP-tau_sort_4020_0100_250100_0100-seed0-15.4: iter=3, error-rate=15, num-dialogs=1000 ***
+RESULTS:: 14:18:37: root                               EvaluationManager.py <_prstr>179 :  Results for domain: Laptops11 --evaluated by: objective success evaluator
+RESULTS:: 14:18:37: root                               EvaluationManager.py <_prstr>179 :  # of dialogues  = 1000
+RESULTS:: 14:18:37: root                               EvaluationManager.py <_prstr>179 :  Average reward  = 6.42 +- 0.64
+RESULTS:: 14:18:37: root                               EvaluationManager.py <_prstr>179 :  Average success = 84.00 +- 2.27
+RESULTS:: 14:18:37: root                               EvaluationManager.py <_prstr>179 :  Average turns   = 10.38 +- 0.32
+RESULTS:: 14:18:37: root                                   pydial.py <setEvalConfig>470 :  *** Evaluating env3-LAP-tau_sort_4020_0100_250100_0100-seed0-15.4: error-rate=15 num-dialogs=500 ***
+RESULTS:: 14:32:56: root                               EvaluationManager.py <_prstr>179 :  Results for domain: Laptops11 --evaluated by: objective success evaluator
+RESULTS:: 14:32:56: root                               EvaluationManager.py <_prstr>179 :  # of dialogues  = 500
+RESULTS:: 14:32:56: root                               EvaluationManager.py <_prstr>179 :  Average reward  = 5.50 +- 0.92
+RESULTS:: 14:32:56: root                               EvaluationManager.py <_prstr>179 :  Average success = 66.20 +- 4.16
+RESULTS:: 14:32:56: root                               EvaluationManager.py <_prstr>179 :  Average turns   = 7.74 +- 0.24
+RESULTS:: 14:32:56: root                                   pydial.py <train_command>807 :  *** Training complete. log: env3-LAP-tau_sort_4020_0100_250100_0100-seed0-15.1-4.train.log - final policy is env3-LAP-tau_sort_4020_0100_250100_0100-15-04
