@@ -2,6 +2,7 @@ import mxnet as mx
 import mxnet.gluon as gl
 import mxnet.ndarray as nd
 import copy
+import random
 
 print mx.gpu()
 a = nd.array([1, 2, 3], ctx=mx.gpu())
@@ -13,22 +14,46 @@ CTX = mx.gpu()
 
 class MATransfer(gl.nn.Block):
     def __init__(self, slots, local_in_units, local_units, local_dropout,
-                 global_in_units, global_units, global_dropout, activation, use_comm=True):
+                 global_in_units, global_units, global_dropout, activation,
+                 concrete_share_rate, dropout_regularizer, use_comm=True):
         gl.nn.Block.__init__(self)
         self.slots = slots
         self.use_comm = use_comm
+        self.local_in_units = local_in_units
+        self.local_units = local_units
+        self.concrete_share_rate = concrete_share_rate
+        self.dropout_regularizer = dropout_regularizer
         with self.name_scope():
             self.local_share_trans = gl.nn.Dense(in_units=local_in_units, units=local_units, activation=activation)
             self.global_trans = gl.nn.Dense(in_units=global_in_units, units=global_units, activation=activation)
             if self.use_comm:
-                self.local2local_comm = gl.nn.Dense(in_units=local_in_units, units=local_units, activation=activation)
+                self.local2local_share_comm = gl.nn.Dense(
+                    in_units=local_in_units, units=local_units, activation=activation)
                 self.local2global_comm = gl.nn.Dense(in_units=local_in_units, units=global_units, activation=activation)
                 self.global2local_comm = gl.nn.Dense(in_units=global_in_units, units=local_units, activation=activation)
+            self.local_private_trans = []
+            self.local2local_private_comm = []
+            self.share_rate = []
+            for i in range(self.slots):
+                self.local_private_trans.append(gl.nn.Dense(
+                    in_units=local_in_units, units=local_units, activation=activation))
+                self.register_child(self.local_private_trans[-1])
+                if self.use_comm:
+                    self.local2local_private_comm.append(gl.nn.Dense(
+                        in_units=local_in_units, units=local_units, activation=activation))
+                    self.register_child(self.local2local_private_comm[-1])
+                if concrete_share_rate:
+                    self.share_rate.append(self.params.get(
+                        name='sharerate_{slot_num}'.format(slot_num=i), shape=(1, 1), init=mx.init.Constant([[2.]])))
+
             self.local_dropout_op = gl.nn.Dropout(local_dropout)
             self.global_dropout_op = gl.nn.Dropout(global_dropout)
-        print use_comm
 
-    def forward(self, inputs):
+        # print concrete_share_rate
+        # print dropout_regularizer
+        # exit(0)
+
+    def forward(self, inputs, loss=None):
         assert len(inputs) == self.slots + 1
 
         local_drop_vec = nd.ones_like(inputs[0])
@@ -37,20 +62,61 @@ class MATransfer(gl.nn.Block):
             inputs[i] = inputs[i] * local_drop_vec
         inputs[-1] = self.global_dropout_op(inputs[-1])
 
+        local_share_vec = []
+        local_private_vec = []
+        if self.concrete_share_rate:
+            for i in range(self.slots):
+                proba = nd.sigmoid(data=self.share_rate[i].data())
+                proba = nd.broadcast_axis(data=proba, axis=(0, 1), size=inputs[0].shape)
+                u_vec = nd.random_uniform(low=1e-5, high=1. - 1e-5, shape=inputs[0].shape, ctx=CTX)
+                local_share_vec.append(nd.sigmoid(10. * (
+                    nd.log(proba) - nd.log(1. - proba) +
+                    nd.log(u_vec) - nd.log(1. - u_vec)
+                )))
+                local_private_vec.append(1. - local_share_vec[i])
+                # print 'proba:', proba
+                # print 'dropout_regularizer:', self.dropout_regularizer
+                if loss is not None:
+                    loss.append(
+                        self.dropout_regularizer * nd.sum(proba * nd.log(proba) + (1. - proba) * nd.log(1. - proba)))
+            if random.random() < 0.01:
+                for i in range(self.slots):
+                    proba = nd.sigmoid(data=self.share_rate[i].data())
+                    print proba.asnumpy(),
+                print ''
+
+        else:
+            local_share_vec = [nd.ones_like(inputs[0]), ] * self.slots
+            local_private_vec = [nd.zeros_like(inputs[0]), ] * self.slots
+        # local_share_vec = (1. - self.private_rate) * nd.Dropout(
+        #     nd.ones(shape=(inputs[0].shape[0], self.local_units)), p=self.private_rate, mode='always')
+        # local_private_vec = 1. - local_share_vec
+
         results = []
 
         for i in range(self.slots):
-            results.append(self.local_share_trans(inputs[i]))
+            results.append(self.local_private_trans[i](local_share_vec[i] * inputs[i]) +
+                           self.local_share_trans(local_private_vec[i] * inputs[i]))
         results.append(self.global_trans(inputs[-1]))
 
         if self.use_comm:
+            mean_vec = nd.zeros_like(inputs[0])
             for i in range(self.slots):
-                for j in range(self.slots):
-                    if i != j:
-                        results[j] = results[j] + self.local2local_comm(inputs[i])
-                results[-1] = results[-1] + self.local2global_comm(inputs[i])
+                mean_vec = mean_vec + inputs[i]
+            mean_vec = mean_vec / float(self.slots)
+
             for i in range(self.slots):
+                results[i] = results[i] + self.local2local_share_comm(local_share_vec[i] * mean_vec) + \
+                             self.local2local_private_comm[i](local_private_vec[i] * mean_vec)
                 results[i] = results[i] + self.global2local_comm(inputs[-1])
+            results[-1] = results[-1] + self.local2global_comm(mean_vec)
+            # for i in range(self.slots):
+            #     for j in range(self.slots):
+            #         if i != j:
+            #             results[j] = results[j] + self.local2local_share_comm(inputs[i])
+            #     results[-1] = results[-1] + self.local2global_comm(inputs[i])
+            # for i in range(self.slots):
+            #     results[i] = results[i] + self.global2local_comm(inputs[-1])
 
         return results
 
@@ -58,7 +124,7 @@ class MATransfer(gl.nn.Block):
 class MultiAgentNetwork(gl.nn.Block):
     def __init__(self, domain_string, hidden_layers, local_hidden_units, local_dropouts,
                  global_hidden_units, global_dropouts, private_rate, sort_input_vec,
-                 share_last_layer, recurrent_mode, input_comm, **kwargs):
+                 share_last_layer, recurrent_mode, input_comm, concrete_share_rate, dropout_regularizer, **kwargs):
         gl.nn.Block.__init__(self, **kwargs)
 
         self.domain_string = domain_string
@@ -87,7 +153,6 @@ class MultiAgentNetwork(gl.nn.Block):
             raise ValueError
 
         self.hidden_layers = hidden_layers
-        print 'hidden_layers:', self.hidden_layers
         self.local_hidden_units = local_hidden_units
         self.local_dropouts = local_dropouts
         self.global_hidden_units = global_hidden_units
@@ -96,6 +161,8 @@ class MultiAgentNetwork(gl.nn.Block):
         self.sort_input_vec = sort_input_vec
         self.share_last_layer = share_last_layer
         self.recurrent_mode = recurrent_mode
+        self.conrete_share_rate = concrete_share_rate
+        self.dropout_regularizer = dropout_regularizer
 
         with self.name_scope():
             if self.sort_input_vec is False:
@@ -119,7 +186,9 @@ class MultiAgentNetwork(gl.nn.Block):
                     global_units=self.global_hidden_units[0],
                     global_dropout=0.,
                     activation='relu',
-                    use_comm=input_comm
+                    use_comm=input_comm,
+                    concrete_share_rate=self.conrete_share_rate,
+                    dropout_regularizer=self.dropout_regularizer
                 )
 
             if self.recurrent_mode is False:
@@ -133,7 +202,9 @@ class MultiAgentNetwork(gl.nn.Block):
                         global_in_units=self.global_hidden_units[i],
                         global_units=self.global_hidden_units[i + 1],
                         global_dropout=self.global_dropouts[i],
-                        activation='relu'
+                        activation='relu',
+                        concrete_share_rate=self.conrete_share_rate,
+                        dropout_regularizer=self.dropout_regularizer
                     ))
                     self.register_child(self.ma_trans[-1])
             else:
@@ -150,7 +221,9 @@ class MultiAgentNetwork(gl.nn.Block):
                         global_in_units=self.global_hidden_units[0],
                         global_units=self.global_hidden_units[0],
                         global_dropout=self.global_dropouts[0],
-                        activation='relu'
+                        activation='relu',
+                        concrete_share_rate=self.conrete_share_rate,
+                        dropout_regularizer=self.dropout_regularizer
                 )
 
             if self.share_last_layer is False:
@@ -172,14 +245,16 @@ class MultiAgentNetwork(gl.nn.Block):
                     global_in_units=self.global_hidden_units[-1],
                     global_units=7,
                     global_dropout=self.global_dropouts[self.hidden_layers - 1],
-                    activation=None
+                    activation=None,
+                    concrete_share_rate=self.conrete_share_rate,
+                    dropout_regularizer=self.dropout_regularizer
                 )
 
             # for key, value in self.collect_params().items():
             #     print key, value
             # exit(0)
 
-    def forward(self, input_vec):
+    def forward(self, input_vec, loss=None):
         # get inputs for every slot(including global)
         inputs = {}
         for slot in self.slots:
@@ -206,14 +281,14 @@ class MultiAgentNetwork(gl.nn.Block):
                     raise ValueError
                 sorted_inputs.append(nd.concat(tmp, inputs[slot][:, -2:], dim=1))
             sorted_inputs.append(inputs['global'])
-            layer.append(self.input_trans(sorted_inputs))
+            layer.append(self.input_trans(sorted_inputs, loss))
 
         # hidden_layers
         for i in range(self.hidden_layers - 1):
             if self.recurrent_mode is False:
-                layer.append(self.ma_trans[i](layer[i]))
+                layer.append(self.ma_trans[i](layer[i], loss))
             else:
-                layer.append(self.ma_trans(layer[i]))
+                layer.append(self.ma_trans(layer[i], loss))
 
         if self.share_last_layer is False:
             # dropout of last hidden layer
@@ -226,13 +301,10 @@ class MultiAgentNetwork(gl.nn.Block):
             for i in range(len(self.slots) + 1):
                 outputs.append(self.output_trans[i](layer[-1][i]))
         else:
-            outputs = self.output_trans(layer[-1])
+            outputs = self.output_trans(layer[-1], loss)
         return nd.concat(*outputs, dim=1)
 
 
-# ===========================
-#   Deep Q Network
-# ===========================
 class DeepQNetwork(object):
     """
     Input to the network is the state and action, output is Q(s,a).
@@ -244,18 +316,14 @@ class DeepQNetwork(object):
                  hidden_layers=None, local_hidden_units=None, local_dropouts=None,
                  global_hidden_units=None, global_dropouts=None, private_rate=None,
                  sort_input_vec=None, share_last_layer=None, recurrent_mode=None,
-                 input_comm=None, target_explore=None):
-        # self.sess = sess
+                 input_comm=None, target_explore=None, concrete_share_rate=None,
+                 dropout_regularizer=None, weight_regularizer=None):
         self.domain_string = domain_string
         self.s_dim = state_dim
         self.a_dim = action_dim
         self.learning_rate = learning_rate
         self.tau = tau
         self.architecture = architecture
-        # self.h1_size = h1_size
-        # self.h1_drop = h1_drop
-        # self.h2_size = h2_size
-        # self.h2_drop = h2_drop
         self.hidden_layers = hidden_layers
         self.local_hidden_units = local_hidden_units
         self.local_dropouts = local_dropouts
@@ -268,13 +336,14 @@ class DeepQNetwork(object):
         self.recurrent_mode = recurrent_mode
         self.input_comm = input_comm
         self.target_explore = target_explore
-        # print 'target_explore:', self.target_explore
+        self.concrete_share_rate = concrete_share_rate
+        self.dropout_regularizer = dropout_regularizer
 
         self.qnet = self.create_ddq_network(prefix='qnet_')
         self.target = self.create_ddq_network(prefix='target_')
 
         self.trainer = gl.Trainer(params=self.qnet.collect_params(), optimizer='adam',
-                                  optimizer_params=dict(learning_rate=self.learning_rate))
+                                  optimizer_params=dict(learning_rate=self.learning_rate, wd=weight_regularizer))
 
     def create_ddq_network(self, prefix=''):
         network = MultiAgentNetwork(domain_string=self.domain_string,
@@ -288,7 +357,11 @@ class DeepQNetwork(object):
                                     share_last_layer=self.share_last_layer,
                                     recurrent_mode=self.recurrent_mode,
                                     input_comm=self.input_comm,
+                                    concrete_share_rate=self.concrete_share_rate,
+                                    dropout_regularizer=self.dropout_regularizer,
                                     prefix=prefix)
+        # print network.collect_params()
+        # exit(0)
         network.initialize(ctx=CTX)
         return network
 
@@ -303,14 +376,19 @@ class DeepQNetwork(object):
         sampled_q = sampled_q.reshape(shape=(sampled_q.shape[0],))
 
         with mx.autograd.record():
-            outputs = self.qnet(inputs)
+            loss_vec = []
+            outputs = self.qnet(inputs, loss_vec)
+            loss = 0.
+            for element in loss_vec:
+                loss = loss + element
+            print 'loss_dropout:', loss
             td_error = nd.sum(data=outputs * action, axis=1) - sampled_q
-            loss = 0
             for i in range(self.minibatch_size):
                 if nd.abs(td_error[i]) < 1.0:
                     loss = loss + 0.5 * nd.square(td_error[i])
                 else:
                     loss = loss + nd.abs(td_error[i]) - 0.5
+            print loss
         loss.backward()
         self.trainer.step(batch_size=self.minibatch_size)
 

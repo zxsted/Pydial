@@ -305,6 +305,18 @@ class DQNPolicy(Policy.Policy):
         if cfg.has_option('dqnpolicy', 'madqn_target_explore'):
             self.madqn_target_explore = cfg.getboolean('dqnpolicy', 'madqn_target_explore')
 
+        self.madqn_concrete_share_rate = False
+        if cfg.has_option('dqnpolicy', 'madqn_concrete_share_rate'):
+            self.madqn_concrete_share_rate = cfg.getboolean('dqnpolicy', 'madqn_concrete_share_rate')
+
+        self.madqn_dropout_regularizer = 0.
+        if cfg.has_option('dqnpolicy', 'madqn_dropout_regularizer'):
+            self.madqn_dropout_regularizer = cfg.getfloat('dqnpolicy', 'madqn_dropout_regularizer')
+
+        self.madqn_weight_regularizer = 0.
+        if cfg.has_option('dqnpolicy', 'madqn_weight_regularizer'):
+            self.madqn_weight_regularizer = cfg.getfloat('dqnpolicy', 'madqn_weight_regularizer')
+
         self.training_frequency = 2
         if cfg.has_option('dqnpolicy', 'training_frequency'):
             self.training_frequency = cfg.getint('dqnpolicy', 'training_frequency')
@@ -441,7 +453,10 @@ class DQNPolicy(Policy.Policy):
                                     self.madqn_global_hidden_units, self.madqn_global_dropouts,
                                     self.madqn_private_rate, self.madqn_sort_input_vec,
                                     self.madqn_share_last_layer, self.madqn_recurrent_mode,
-                                    self.madqn_input_comm, self.madqn_target_explore)
+                                    self.madqn_input_comm, self.madqn_target_explore,
+                                    concrete_share_rate=self.madqn_concrete_share_rate,
+                                    dropout_regularizer=self.madqn_dropout_regularizer,
+                                    weight_regularizer=self.madqn_weight_regularizer)
 
         # when all models are defined, init all variables
         # init_op = tf.global_variables_initializer()
