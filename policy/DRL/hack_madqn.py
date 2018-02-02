@@ -149,6 +149,19 @@ class MultiAgentNetwork(gl.nn.Block):
             self.global_dimension = [(5, 130), (197, 257)]
             self.input_dimension = 257
             self.global_input_dimension = 257 - 197 + 125
+        elif self.domain_string == 'SFRestaurants':
+            self.slots = ['allowedforkids', 'area', 'food', 'goodformeal', 'near', 'pricerange']
+            self.slot_dimension = {
+                'goodformeal': (0, 6),
+                'area': (250, 407),
+                'food': (407, 468),
+                'allowedforkids': (566, 570),
+                'near': (570, 581),
+                'pricerange': (581, 586)
+            }
+            self.global_dimension = [(6, 250), (468, 566), (586, 636)]
+            self.input_dimension = 636
+            self.global_input_dimension = (636 - 586) + (566 - 468) + (250 - 6)
         else:
             raise ValueError
 
@@ -278,7 +291,7 @@ class MultiAgentNetwork(gl.nn.Block):
                 if tmp.shape[1] < 20:
                     tmp = nd.concat(tmp, nd.zeros((tmp.shape[0], 20 - tmp.shape[1]), ctx=CTX), dim=1)
                 else:
-                    raise ValueError
+                    tmp = nd.slice_axis(tmp, axis=1, begin=0, end=20)
                 sorted_inputs.append(nd.concat(tmp, inputs[slot][:, -2:], dim=1))
             sorted_inputs.append(inputs['global'])
             layer.append(self.input_trans(sorted_inputs, loss))
@@ -388,7 +401,7 @@ class DeepQNetwork(object):
                     loss = loss + 0.5 * nd.square(td_error[i])
                 else:
                     loss = loss + nd.abs(td_error[i]) - 0.5
-            print loss
+            # print loss
         loss.backward()
         self.trainer.step(batch_size=self.minibatch_size)
 
