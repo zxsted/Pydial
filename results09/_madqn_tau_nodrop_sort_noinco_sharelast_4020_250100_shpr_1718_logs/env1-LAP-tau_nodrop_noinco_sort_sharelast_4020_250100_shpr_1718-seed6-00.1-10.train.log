@@ -1,0 +1,131 @@
+RESULTS:: 19:45:13: root                                   pydial.py <train_command>791 :  List of domains: Laptops11
+RESULTS:: 19:45:13: root                                      pydial.py <trainBatch>409 :  *** Training Iteration env1-LAP-tau_nodrop_noinco_sort_sharelast_4020_250100_shpr_1718-seed6-00.0->env1-LAP-tau_nodrop_noinco_sort_sharelast_4020_250100_shpr_1718-seed6-00.1: iter=0, error-rate=0, num-dialogs=1000 ***
+RESULTS:: 20:15:21: root                               EvaluationManager.py <_prstr>179 :  Results for domain: Laptops11 --evaluated by: objective success evaluator
+RESULTS:: 20:15:21: root                               EvaluationManager.py <_prstr>179 :  # of dialogues  = 1000
+RESULTS:: 20:15:21: root                               EvaluationManager.py <_prstr>179 :  Average reward  = 7.56 +- 0.60
+RESULTS:: 20:15:21: root                               EvaluationManager.py <_prstr>179 :  Average success = 85.20 +- 2.20
+RESULTS:: 20:15:21: root                               EvaluationManager.py <_prstr>179 :  Average turns   = 9.48 +- 0.28
+RESULTS:: 20:15:21: root                                   pydial.py <setEvalConfig>470 :  *** Evaluating env1-LAP-tau_nodrop_noinco_sort_sharelast_4020_250100_shpr_1718-seed6-00.1: error-rate=0 num-dialogs=500 ***
+RESULTS:: 20:27:15: root                               EvaluationManager.py <_prstr>179 :  Results for domain: Laptops11 --evaluated by: objective success evaluator
+RESULTS:: 20:27:15: root                               EvaluationManager.py <_prstr>179 :  # of dialogues  = 500
+RESULTS:: 20:27:15: root                               EvaluationManager.py <_prstr>179 :  Average reward  = 8.38 +- 0.79
+RESULTS:: 20:27:15: root                               EvaluationManager.py <_prstr>179 :  Average success = 81.00 +- 3.45
+RESULTS:: 20:27:15: root                               EvaluationManager.py <_prstr>179 :  Average turns   = 7.82 +- 0.28
+RESULTS:: 20:27:15: root                                   pydial.py <train_command>791 :  List of domains: Laptops11
+RESULTS:: 20:27:15: root                                      pydial.py <trainBatch>409 :  *** Training Iteration env1-LAP-tau_nodrop_noinco_sort_sharelast_4020_250100_shpr_1718-seed6-00.1->env1-LAP-tau_nodrop_noinco_sort_sharelast_4020_250100_shpr_1718-seed6-00.2: iter=1, error-rate=0, num-dialogs=1000 ***
+RESULTS:: 20:56:29: root                               EvaluationManager.py <_prstr>179 :  Results for domain: Laptops11 --evaluated by: objective success evaluator
+RESULTS:: 20:56:29: root                               EvaluationManager.py <_prstr>179 :  # of dialogues  = 1000
+RESULTS:: 20:56:29: root                               EvaluationManager.py <_prstr>179 :  Average reward  = 8.95 +- 0.50
+RESULTS:: 20:56:29: root                               EvaluationManager.py <_prstr>179 :  Average success = 89.80 +- 1.88
+RESULTS:: 20:56:29: root                               EvaluationManager.py <_prstr>179 :  Average turns   = 9.01 +- 0.27
+RESULTS:: 20:56:29: root                                   pydial.py <setEvalConfig>470 :  *** Evaluating env1-LAP-tau_nodrop_noinco_sort_sharelast_4020_250100_shpr_1718-seed6-00.2: error-rate=0 num-dialogs=500 ***
+RESULTS:: 21:08:13: root                               EvaluationManager.py <_prstr>179 :  Results for domain: Laptops11 --evaluated by: objective success evaluator
+RESULTS:: 21:08:13: root                               EvaluationManager.py <_prstr>179 :  # of dialogues  = 500
+RESULTS:: 21:08:13: root                               EvaluationManager.py <_prstr>179 :  Average reward  = 8.60 +- 0.74
+RESULTS:: 21:08:13: root                               EvaluationManager.py <_prstr>179 :  Average success = 81.80 +- 3.39
+RESULTS:: 21:08:13: root                               EvaluationManager.py <_prstr>179 :  Average turns   = 7.76 +- 0.26
+RESULTS:: 21:08:13: root                                   pydial.py <train_command>791 :  List of domains: Laptops11
+RESULTS:: 21:08:13: root                                      pydial.py <trainBatch>409 :  *** Training Iteration env1-LAP-tau_nodrop_noinco_sort_sharelast_4020_250100_shpr_1718-seed6-00.2->env1-LAP-tau_nodrop_noinco_sort_sharelast_4020_250100_shpr_1718-seed6-00.3: iter=2, error-rate=0, num-dialogs=1000 ***
+RESULTS:: 21:36:47: root                               EvaluationManager.py <_prstr>179 :  Results for domain: Laptops11 --evaluated by: objective success evaluator
+RESULTS:: 21:36:47: root                               EvaluationManager.py <_prstr>179 :  # of dialogues  = 1000
+RESULTS:: 21:36:47: root                               EvaluationManager.py <_prstr>179 :  Average reward  = 9.32 +- 0.46
+RESULTS:: 21:36:47: root                               EvaluationManager.py <_prstr>179 :  Average success = 90.80 +- 1.79
+RESULTS:: 21:36:47: root                               EvaluationManager.py <_prstr>179 :  Average turns   = 8.84 +- 0.24
+RESULTS:: 21:36:47: root                                   pydial.py <setEvalConfig>470 :  *** Evaluating env1-LAP-tau_nodrop_noinco_sort_sharelast_4020_250100_shpr_1718-seed6-00.3: error-rate=0 num-dialogs=500 ***
+RESULTS:: 21:47:41: root                               EvaluationManager.py <_prstr>179 :  Results for domain: Laptops11 --evaluated by: objective success evaluator
+RESULTS:: 21:47:41: root                               EvaluationManager.py <_prstr>179 :  # of dialogues  = 500
+RESULTS:: 21:47:41: root                               EvaluationManager.py <_prstr>179 :  Average reward  = 6.04 +- 0.88
+RESULTS:: 21:47:41: root                               EvaluationManager.py <_prstr>179 :  Average success = 66.80 +- 4.14
+RESULTS:: 21:47:41: root                               EvaluationManager.py <_prstr>179 :  Average turns   = 7.32 +- 0.20
+RESULTS:: 21:47:41: root                                   pydial.py <train_command>791 :  List of domains: Laptops11
+RESULTS:: 21:47:41: root                                      pydial.py <trainBatch>409 :  *** Training Iteration env1-LAP-tau_nodrop_noinco_sort_sharelast_4020_250100_shpr_1718-seed6-00.3->env1-LAP-tau_nodrop_noinco_sort_sharelast_4020_250100_shpr_1718-seed6-00.4: iter=3, error-rate=0, num-dialogs=1000 ***
+RESULTS:: 22:16:33: root                               EvaluationManager.py <_prstr>179 :  Results for domain: Laptops11 --evaluated by: objective success evaluator
+RESULTS:: 22:16:33: root                               EvaluationManager.py <_prstr>179 :  # of dialogues  = 1000
+RESULTS:: 22:16:33: root                               EvaluationManager.py <_prstr>179 :  Average reward  = 8.60 +- 0.53
+RESULTS:: 22:16:33: root                               EvaluationManager.py <_prstr>179 :  Average success = 87.90 +- 2.02
+RESULTS:: 22:16:33: root                               EvaluationManager.py <_prstr>179 :  Average turns   = 8.98 +- 0.26
+RESULTS:: 22:16:33: root                                   pydial.py <setEvalConfig>470 :  *** Evaluating env1-LAP-tau_nodrop_noinco_sort_sharelast_4020_250100_shpr_1718-seed6-00.4: error-rate=0 num-dialogs=500 ***
+RESULTS:: 22:28:08: root                               EvaluationManager.py <_prstr>179 :  Results for domain: Laptops11 --evaluated by: objective success evaluator
+RESULTS:: 22:28:08: root                               EvaluationManager.py <_prstr>179 :  # of dialogues  = 500
+RESULTS:: 22:28:08: root                               EvaluationManager.py <_prstr>179 :  Average reward  = 8.69 +- 0.76
+RESULTS:: 22:28:08: root                               EvaluationManager.py <_prstr>179 :  Average success = 81.80 +- 3.39
+RESULTS:: 22:28:08: root                               EvaluationManager.py <_prstr>179 :  Average turns   = 7.67 +- 0.26
+RESULTS:: 22:28:08: root                                   pydial.py <train_command>791 :  List of domains: Laptops11
+RESULTS:: 22:28:08: root                                      pydial.py <trainBatch>409 :  *** Training Iteration env1-LAP-tau_nodrop_noinco_sort_sharelast_4020_250100_shpr_1718-seed6-00.4->env1-LAP-tau_nodrop_noinco_sort_sharelast_4020_250100_shpr_1718-seed6-00.5: iter=4, error-rate=0, num-dialogs=1000 ***
+RESULTS:: 22:58:57: root                               EvaluationManager.py <_prstr>179 :  Results for domain: Laptops11 --evaluated by: objective success evaluator
+RESULTS:: 22:58:57: root                               EvaluationManager.py <_prstr>179 :  # of dialogues  = 1000
+RESULTS:: 22:58:57: root                               EvaluationManager.py <_prstr>179 :  Average reward  = 8.51 +- 0.55
+RESULTS:: 22:58:57: root                               EvaluationManager.py <_prstr>179 :  Average success = 87.10 +- 2.08
+RESULTS:: 22:58:57: root                               EvaluationManager.py <_prstr>179 :  Average turns   = 8.91 +- 0.27
+RESULTS:: 22:58:57: root                                   pydial.py <setEvalConfig>470 :  *** Evaluating env1-LAP-tau_nodrop_noinco_sort_sharelast_4020_250100_shpr_1718-seed6-00.5: error-rate=0 num-dialogs=500 ***
+RESULTS:: 23:10:57: root                               EvaluationManager.py <_prstr>179 :  Results for domain: Laptops11 --evaluated by: objective success evaluator
+RESULTS:: 23:10:57: root                               EvaluationManager.py <_prstr>179 :  # of dialogues  = 500
+RESULTS:: 23:10:57: root                               EvaluationManager.py <_prstr>179 :  Average reward  = 9.26 +- 0.72
+RESULTS:: 23:10:57: root                               EvaluationManager.py <_prstr>179 :  Average success = 85.60 +- 3.08
+RESULTS:: 23:10:57: root                               EvaluationManager.py <_prstr>179 :  Average turns   = 7.86 +- 0.28
+RESULTS:: 23:10:57: root                                   pydial.py <train_command>791 :  List of domains: Laptops11
+RESULTS:: 23:10:57: root                                      pydial.py <trainBatch>409 :  *** Training Iteration env1-LAP-tau_nodrop_noinco_sort_sharelast_4020_250100_shpr_1718-seed6-00.5->env1-LAP-tau_nodrop_noinco_sort_sharelast_4020_250100_shpr_1718-seed6-00.6: iter=5, error-rate=0, num-dialogs=1000 ***
+RESULTS:: 23:40:14: root                               EvaluationManager.py <_prstr>179 :  Results for domain: Laptops11 --evaluated by: objective success evaluator
+RESULTS:: 23:40:14: root                               EvaluationManager.py <_prstr>179 :  # of dialogues  = 1000
+RESULTS:: 23:40:14: root                               EvaluationManager.py <_prstr>179 :  Average reward  = 8.84 +- 0.51
+RESULTS:: 23:40:14: root                               EvaluationManager.py <_prstr>179 :  Average success = 89.30 +- 1.92
+RESULTS:: 23:40:14: root                               EvaluationManager.py <_prstr>179 :  Average turns   = 9.03 +- 0.26
+RESULTS:: 23:40:14: root                                   pydial.py <setEvalConfig>470 :  *** Evaluating env1-LAP-tau_nodrop_noinco_sort_sharelast_4020_250100_shpr_1718-seed6-00.6: error-rate=0 num-dialogs=500 ***
+RESULTS:: 23:51:57: root                               EvaluationManager.py <_prstr>179 :  Results for domain: Laptops11 --evaluated by: objective success evaluator
+RESULTS:: 23:51:57: root                               EvaluationManager.py <_prstr>179 :  # of dialogues  = 500
+RESULTS:: 23:51:57: root                               EvaluationManager.py <_prstr>179 :  Average reward  = 11.27 +- 0.52
+RESULTS:: 23:51:57: root                               EvaluationManager.py <_prstr>179 :  Average success = 94.20 +- 2.05
+RESULTS:: 23:51:57: root                               EvaluationManager.py <_prstr>179 :  Average turns   = 7.57 +- 0.26
+RESULTS:: 23:51:57: root                                   pydial.py <train_command>791 :  List of domains: Laptops11
+RESULTS:: 23:51:57: root                                      pydial.py <trainBatch>409 :  *** Training Iteration env1-LAP-tau_nodrop_noinco_sort_sharelast_4020_250100_shpr_1718-seed6-00.6->env1-LAP-tau_nodrop_noinco_sort_sharelast_4020_250100_shpr_1718-seed6-00.7: iter=6, error-rate=0, num-dialogs=1000 ***
+RESULTS:: 00:21:01: root                               EvaluationManager.py <_prstr>179 :  Results for domain: Laptops11 --evaluated by: objective success evaluator
+RESULTS:: 00:21:01: root                               EvaluationManager.py <_prstr>179 :  # of dialogues  = 1000
+RESULTS:: 00:21:01: root                               EvaluationManager.py <_prstr>179 :  Average reward  = 9.28 +- 0.48
+RESULTS:: 00:21:01: root                               EvaluationManager.py <_prstr>179 :  Average success = 91.20 +- 1.76
+RESULTS:: 00:21:01: root                               EvaluationManager.py <_prstr>179 :  Average turns   = 8.96 +- 0.26
+RESULTS:: 00:21:01: root                                   pydial.py <setEvalConfig>470 :  *** Evaluating env1-LAP-tau_nodrop_noinco_sort_sharelast_4020_250100_shpr_1718-seed6-00.7: error-rate=0 num-dialogs=500 ***
+RESULTS:: 00:31:37: root                               EvaluationManager.py <_prstr>179 :  Results for domain: Laptops11 --evaluated by: objective success evaluator
+RESULTS:: 00:31:37: root                               EvaluationManager.py <_prstr>179 :  # of dialogues  = 500
+RESULTS:: 00:31:37: root                               EvaluationManager.py <_prstr>179 :  Average reward  = 4.54 +- 0.95
+RESULTS:: 00:31:37: root                               EvaluationManager.py <_prstr>179 :  Average success = 57.40 +- 4.34
+RESULTS:: 00:31:37: root                               EvaluationManager.py <_prstr>179 :  Average turns   = 6.94 +- 0.22
+RESULTS:: 00:31:37: root                                   pydial.py <train_command>791 :  List of domains: Laptops11
+RESULTS:: 00:31:37: root                                      pydial.py <trainBatch>409 :  *** Training Iteration env1-LAP-tau_nodrop_noinco_sort_sharelast_4020_250100_shpr_1718-seed6-00.7->env1-LAP-tau_nodrop_noinco_sort_sharelast_4020_250100_shpr_1718-seed6-00.8: iter=7, error-rate=0, num-dialogs=1000 ***
+RESULTS:: 01:00:31: root                               EvaluationManager.py <_prstr>179 :  Results for domain: Laptops11 --evaluated by: objective success evaluator
+RESULTS:: 01:00:31: root                               EvaluationManager.py <_prstr>179 :  # of dialogues  = 1000
+RESULTS:: 01:00:31: root                               EvaluationManager.py <_prstr>179 :  Average reward  = 9.56 +- 0.47
+RESULTS:: 01:00:31: root                               EvaluationManager.py <_prstr>179 :  Average success = 91.60 +- 1.72
+RESULTS:: 01:00:31: root                               EvaluationManager.py <_prstr>179 :  Average turns   = 8.76 +- 0.25
+RESULTS:: 01:00:31: root                                   pydial.py <setEvalConfig>470 :  *** Evaluating env1-LAP-tau_nodrop_noinco_sort_sharelast_4020_250100_shpr_1718-seed6-00.8: error-rate=0 num-dialogs=500 ***
+RESULTS:: 01:11:56: root                               EvaluationManager.py <_prstr>179 :  Results for domain: Laptops11 --evaluated by: objective success evaluator
+RESULTS:: 01:11:56: root                               EvaluationManager.py <_prstr>179 :  # of dialogues  = 500
+RESULTS:: 01:11:56: root                               EvaluationManager.py <_prstr>179 :  Average reward  = 9.82 +- 0.71
+RESULTS:: 01:11:56: root                               EvaluationManager.py <_prstr>179 :  Average success = 86.00 +- 3.05
+RESULTS:: 01:11:56: root                               EvaluationManager.py <_prstr>179 :  Average turns   = 7.38 +- 0.25
+RESULTS:: 01:11:56: root                                   pydial.py <train_command>791 :  List of domains: Laptops11
+RESULTS:: 01:11:56: root                                      pydial.py <trainBatch>409 :  *** Training Iteration env1-LAP-tau_nodrop_noinco_sort_sharelast_4020_250100_shpr_1718-seed6-00.8->env1-LAP-tau_nodrop_noinco_sort_sharelast_4020_250100_shpr_1718-seed6-00.9: iter=8, error-rate=0, num-dialogs=1000 ***
+RESULTS:: 01:41:04: root                               EvaluationManager.py <_prstr>179 :  Results for domain: Laptops11 --evaluated by: objective success evaluator
+RESULTS:: 01:41:04: root                               EvaluationManager.py <_prstr>179 :  # of dialogues  = 1000
+RESULTS:: 01:41:04: root                               EvaluationManager.py <_prstr>179 :  Average reward  = 8.79 +- 0.50
+RESULTS:: 01:41:04: root                               EvaluationManager.py <_prstr>179 :  Average success = 89.30 +- 1.92
+RESULTS:: 01:41:04: root                               EvaluationManager.py <_prstr>179 :  Average turns   = 9.07 +- 0.26
+RESULTS:: 01:41:04: root                                   pydial.py <setEvalConfig>470 :  *** Evaluating env1-LAP-tau_nodrop_noinco_sort_sharelast_4020_250100_shpr_1718-seed6-00.9: error-rate=0 num-dialogs=500 ***
+RESULTS:: 01:52:22: root                               EvaluationManager.py <_prstr>179 :  Results for domain: Laptops11 --evaluated by: objective success evaluator
+RESULTS:: 01:52:22: root                               EvaluationManager.py <_prstr>179 :  # of dialogues  = 500
+RESULTS:: 01:52:22: root                               EvaluationManager.py <_prstr>179 :  Average reward  = 10.54 +- 0.61
+RESULTS:: 01:52:22: root                               EvaluationManager.py <_prstr>179 :  Average success = 90.20 +- 2.61
+RESULTS:: 01:52:22: root                               EvaluationManager.py <_prstr>179 :  Average turns   = 7.50 +- 0.24
+RESULTS:: 01:52:22: root                                   pydial.py <train_command>791 :  List of domains: Laptops11
+RESULTS:: 01:52:22: root                                      pydial.py <trainBatch>409 :  *** Training Iteration env1-LAP-tau_nodrop_noinco_sort_sharelast_4020_250100_shpr_1718-seed6-00.9->env1-LAP-tau_nodrop_noinco_sort_sharelast_4020_250100_shpr_1718-seed6-00.10: iter=9, error-rate=0, num-dialogs=1000 ***
+RESULTS:: 02:21:04: root                               EvaluationManager.py <_prstr>179 :  Results for domain: Laptops11 --evaluated by: objective success evaluator
+RESULTS:: 02:21:04: root                               EvaluationManager.py <_prstr>179 :  # of dialogues  = 1000
+RESULTS:: 02:21:04: root                               EvaluationManager.py <_prstr>179 :  Average reward  = 9.14 +- 0.50
+RESULTS:: 02:21:04: root                               EvaluationManager.py <_prstr>179 :  Average success = 90.30 +- 1.84
+RESULTS:: 02:21:04: root                               EvaluationManager.py <_prstr>179 :  Average turns   = 8.92 +- 0.27
+RESULTS:: 02:21:04: root                                   pydial.py <setEvalConfig>470 :  *** Evaluating env1-LAP-tau_nodrop_noinco_sort_sharelast_4020_250100_shpr_1718-seed6-00.10: error-rate=0 num-dialogs=500 ***
+RESULTS:: 02:32:50: root                               EvaluationManager.py <_prstr>179 :  Results for domain: Laptops11 --evaluated by: objective success evaluator
+RESULTS:: 02:32:50: root                               EvaluationManager.py <_prstr>179 :  # of dialogues  = 500
+RESULTS:: 02:32:50: root                               EvaluationManager.py <_prstr>179 :  Average reward  = 7.86 +- 0.85
+RESULTS:: 02:32:50: root                               EvaluationManager.py <_prstr>179 :  Average success = 78.80 +- 3.59
+RESULTS:: 02:32:50: root                               EvaluationManager.py <_prstr>179 :  Average turns   = 7.90 +- 0.30
+RESULTS:: 02:32:50: root                                   pydial.py <train_command>807 :  *** Training complete. log: env1-LAP-tau_nodrop_noinco_sort_sharelast_4020_250100_shpr_1718-seed6-00.1-10.train.log - final policy is env1-LAP-tau_nodrop_noinco_sort_sharelast_4020_250100_shpr_1718-00-10
