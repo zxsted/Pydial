@@ -1,0 +1,53 @@
+RESULTS:: 03:53:43: root                                   pydial.py <train_command>791 :  List of domains: SFRestaurants
+RESULTS:: 03:53:43: root                                      pydial.py <trainBatch>409 :  *** Training Iteration env1-enac-SFR-seed9-00.0->env1-enac-SFR-seed9-00.1: iter=0, error-rate=0, num-dialogs=1000 ***
+RESULTS:: 05:22:38: root                               EvaluationManager.py <_prstr>179 :  Results for domain: SFRestaurants --evaluated by: objective success evaluator
+RESULTS:: 05:22:38: root                               EvaluationManager.py <_prstr>179 :  # of dialogues  = 1000
+RESULTS:: 05:22:38: root                               EvaluationManager.py <_prstr>179 :  Average reward  = 4.07 +- 0.73
+RESULTS:: 05:22:38: root                               EvaluationManager.py <_prstr>179 :  Average success = 69.70 +- 2.85
+RESULTS:: 05:22:38: root                               EvaluationManager.py <_prstr>179 :  Average turns   = 9.87 +- 0.30
+RESULTS:: 05:22:38: root                                   pydial.py <setEvalConfig>470 :  *** Evaluating env1-enac-SFR-seed9-00.1: error-rate=0 num-dialogs=500 ***
+RESULTS:: 05:34:33: root                               EvaluationManager.py <_prstr>179 :  Results for domain: SFRestaurants --evaluated by: objective success evaluator
+RESULTS:: 05:34:33: root                               EvaluationManager.py <_prstr>179 :  # of dialogues  = 500
+RESULTS:: 05:34:33: root                               EvaluationManager.py <_prstr>179 :  Average reward  = 10.14 +- 0.66
+RESULTS:: 05:34:33: root                               EvaluationManager.py <_prstr>179 :  Average success = 89.00 +- 2.75
+RESULTS:: 05:34:33: root                               EvaluationManager.py <_prstr>179 :  Average turns   = 7.66 +- 0.27
+RESULTS:: 05:34:33: root                                   pydial.py <train_command>791 :  List of domains: SFRestaurants
+RESULTS:: 05:34:33: root                                      pydial.py <trainBatch>409 :  *** Training Iteration env1-enac-SFR-seed9-00.1->env1-enac-SFR-seed9-00.2: iter=1, error-rate=0, num-dialogs=1000 ***
+RESULTS:: 07:16:17: root                               EvaluationManager.py <_prstr>179 :  Results for domain: SFRestaurants --evaluated by: objective success evaluator
+RESULTS:: 07:16:17: root                               EvaluationManager.py <_prstr>179 :  # of dialogues  = 1000
+RESULTS:: 07:16:17: root                               EvaluationManager.py <_prstr>179 :  Average reward  = 10.34 +- 0.37
+RESULTS:: 07:16:17: root                               EvaluationManager.py <_prstr>179 :  Average success = 94.80 +- 1.38
+RESULTS:: 07:16:17: root                               EvaluationManager.py <_prstr>179 :  Average turns   = 8.62 +- 0.22
+RESULTS:: 07:16:17: root                                   pydial.py <setEvalConfig>470 :  *** Evaluating env1-enac-SFR-seed9-00.2: error-rate=0 num-dialogs=500 ***
+RESULTS:: 07:28:49: root                               EvaluationManager.py <_prstr>179 :  Results for domain: SFRestaurants --evaluated by: objective success evaluator
+RESULTS:: 07:28:49: root                               EvaluationManager.py <_prstr>179 :  # of dialogues  = 500
+RESULTS:: 07:28:49: root                               EvaluationManager.py <_prstr>179 :  Average reward  = 11.39 +- 0.51
+RESULTS:: 07:28:49: root                               EvaluationManager.py <_prstr>179 :  Average success = 93.40 +- 2.18
+RESULTS:: 07:28:49: root                               EvaluationManager.py <_prstr>179 :  Average turns   = 7.29 +- 0.21
+RESULTS:: 07:28:49: root                                   pydial.py <train_command>791 :  List of domains: SFRestaurants
+RESULTS:: 07:28:49: root                                      pydial.py <trainBatch>409 :  *** Training Iteration env1-enac-SFR-seed9-00.2->env1-enac-SFR-seed9-00.3: iter=2, error-rate=0, num-dialogs=1000 ***
+RESULTS:: 09:02:17: root                               EvaluationManager.py <_prstr>179 :  Results for domain: SFRestaurants --evaluated by: objective success evaluator
+RESULTS:: 09:02:17: root                               EvaluationManager.py <_prstr>179 :  # of dialogues  = 1000
+RESULTS:: 09:02:17: root                               EvaluationManager.py <_prstr>179 :  Average reward  = 10.42 +- 0.38
+RESULTS:: 09:02:17: root                               EvaluationManager.py <_prstr>179 :  Average success = 94.40 +- 1.43
+RESULTS:: 09:02:17: root                               EvaluationManager.py <_prstr>179 :  Average turns   = 8.46 +- 0.21
+RESULTS:: 09:02:17: root                                   pydial.py <setEvalConfig>470 :  *** Evaluating env1-enac-SFR-seed9-00.3: error-rate=0 num-dialogs=500 ***
+RESULTS:: 09:08:32: root                               EvaluationManager.py <_prstr>179 :  Results for domain: SFRestaurants --evaluated by: objective success evaluator
+RESULTS:: 09:08:32: root                               EvaluationManager.py <_prstr>179 :  # of dialogues  = 500
+RESULTS:: 09:08:32: root                               EvaluationManager.py <_prstr>179 :  Average reward  = 10.70 +- 0.63
+RESULTS:: 09:08:32: root                               EvaluationManager.py <_prstr>179 :  Average success = 88.60 +- 2.79
+RESULTS:: 09:08:32: root                               EvaluationManager.py <_prstr>179 :  Average turns   = 7.02 +- 0.19
+RESULTS:: 09:08:32: root                                   pydial.py <train_command>791 :  List of domains: SFRestaurants
+RESULTS:: 09:08:32: root                                      pydial.py <trainBatch>409 :  *** Training Iteration env1-enac-SFR-seed9-00.3->env1-enac-SFR-seed9-00.4: iter=3, error-rate=0, num-dialogs=1000 ***
+RESULTS:: 09:56:45: root                               EvaluationManager.py <_prstr>179 :  Results for domain: SFRestaurants --evaluated by: objective success evaluator
+RESULTS:: 09:56:45: root                               EvaluationManager.py <_prstr>179 :  # of dialogues  = 1000
+RESULTS:: 09:56:45: root                               EvaluationManager.py <_prstr>179 :  Average reward  = 10.69 +- 0.38
+RESULTS:: 09:56:45: root                               EvaluationManager.py <_prstr>179 :  Average success = 95.00 +- 1.35
+RESULTS:: 09:56:45: root                               EvaluationManager.py <_prstr>179 :  Average turns   = 8.31 +- 0.21
+RESULTS:: 09:56:45: root                                   pydial.py <setEvalConfig>470 :  *** Evaluating env1-enac-SFR-seed9-00.4: error-rate=0 num-dialogs=500 ***
+RESULTS:: 10:01:02: root                               EvaluationManager.py <_prstr>179 :  Results for domain: SFRestaurants --evaluated by: objective success evaluator
+RESULTS:: 10:01:02: root                               EvaluationManager.py <_prstr>179 :  # of dialogues  = 500
+RESULTS:: 10:01:02: root                               EvaluationManager.py <_prstr>179 :  Average reward  = 11.85 +- 0.41
+RESULTS:: 10:01:02: root                               EvaluationManager.py <_prstr>179 :  Average success = 96.20 +- 1.68
+RESULTS:: 10:01:02: root                               EvaluationManager.py <_prstr>179 :  Average turns   = 7.39 +- 0.23
+RESULTS:: 10:01:02: root                                   pydial.py <train_command>807 :  *** Training complete. log: env1-enac-SFR-seed9-00.1-4.train.log - final policy is env1-enac-SFR-00-04
