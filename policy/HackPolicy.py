@@ -317,6 +317,10 @@ class DQNPolicy(Policy.Policy):
         if cfg.has_option('dqnpolicy', 'madqn_weight_regularizer'):
             self.madqn_weight_regularizer = cfg.getfloat('dqnpolicy', 'madqn_weight_regularizer')
 
+        self.madqn_non_local_mode = False
+        if cfg.has_option('dqnpolicy', 'madqn_non_local_mode'):
+            self.madqn_non_local_mode = cfg.getboolean('dqnpolicy', 'madqn_non_local_mode')
+
         self.training_frequency = 2
         if cfg.has_option('dqnpolicy', 'training_frequency'):
             self.training_frequency = cfg.getint('dqnpolicy', 'training_frequency')
@@ -456,7 +460,8 @@ class DQNPolicy(Policy.Policy):
                                     self.madqn_input_comm, self.madqn_target_explore,
                                     concrete_share_rate=self.madqn_concrete_share_rate,
                                     dropout_regularizer=self.madqn_dropout_regularizer,
-                                    weight_regularizer=self.madqn_weight_regularizer)
+                                    weight_regularizer=self.madqn_weight_regularizer,
+                                    non_local_mode=self.madqn_non_local_mode)
 
         # when all models are defined, init all variables
         # init_op = tf.global_variables_initializer()
