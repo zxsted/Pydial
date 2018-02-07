@@ -5,7 +5,7 @@
 # Copyright 2015 - 2017
 # Cambridge University Engineering Department Dialogue Systems Group
 #
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -26,7 +26,7 @@ DQNPolicy.py - deep Q network policy
 
 Copyright CUED Dialogue Systems Group 2015 - 2017
 
-.. seealso:: CUED Imports/Dependencies: 
+.. seealso:: CUED Imports/Dependencies:
 
     import :class:`Policy`
     import :class:`utils.ContextLogger`
@@ -61,7 +61,7 @@ from Policy import TerminalAction, TerminalState
 
 logger = utils.ContextLogger.getLogger('')
 
-# --- for flattening the belief --- # 
+# --- for flattening the belief --- #
 def flatten_belief(belief, domainUtil, merge=False):
     belief = belief.getDomainState(domainUtil.domainString)
     if isinstance(belief, TerminalState):
@@ -100,8 +100,6 @@ def flatten_belief(belief, domainUtil, merge=False):
                 except:
                     add_feature.append(0.)  # for dontcare
 
-                print 'slot:', slot, '::::::: len:', len(add_feature)
-
         elif feat == 'method':
             add_feature = [belief['beliefs']['method'][method] for method in domainUtil.ontology['method']]
         elif feat == 'discourseAct':
@@ -120,8 +118,6 @@ def flatten_belief(belief, domainUtil, merge=False):
             logger.error('Invalid feature name in config: ' + feat)
 
         flat_belief += add_feature
-
-        print 'feat:', feat, ':::::::: len:', len(flat_belief)
 
     return flat_belief
 
@@ -589,12 +585,6 @@ class DQNPolicy(Policy.Policy):
 
         self.stats[nextaIdex] += 1
         summaryAct = self.summaryaction.action_names[nextaIdex]
-
-        print 'elements:'
-        for element in self.summaryaction.action_names:
-            print element
-        exit(0)
-
         beliefstate = beliefstate.getDomainState(self.domainUtil.domainString)
         masterAct = self.summaryaction.Convert(beliefstate, summaryAct, self.lastSystemAction)
         return masterAct, nextaIdex
