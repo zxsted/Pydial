@@ -58,7 +58,8 @@ class MATransfer(gl.nn.Block):
                 self.g_local2local = gl.nn.Dense(in_units=local_in_units, units=local_units, use_bias=False)
                 self.g_global2local = gl.nn.Dense(in_units=global_in_units, units=local_units, use_bias=False)
                 self.g_local2global = gl.nn.Dense(in_units=local_in_units, units=global_units, use_bias=False)
-                self.f_emit_local = gl.nn.Dense(in_units=local_in_units, units=mid_units, use_bias=False)
+                self.f_emit_local2local = gl.nn.Dense(in_units=local_in_units, units=mid_units, use_bias=False)
+                self.f_emit_local2global = gl.nn.Dense(in_units=local_in_units, units=mid_units, use_bias=False)
                 self.f_rec_local = gl.nn.Dense(in_units=local_in_units, units=mid_units, use_bias=False)
                 self.f_rec_global = gl.nn.Dense(in_units=global_in_units, units=mid_units, use_bias=False)
 
@@ -75,7 +76,7 @@ class MATransfer(gl.nn.Block):
                 norm_fac = None
                 for j in range(self.slots):
                     if i != j:
-                        f[i][j] = nd.sum(self.f_rec_local(inputs[i]) * self.f_emit_local(inputs[j]), axis=1)
+                        f[i][j] = nd.sum(self.f_rec_local(inputs[i]) * self.f_emit_local2local(inputs[j]), axis=1)
                         f[i][j] = nd.exp(f[i][j]).reshape((f[i][j].shape[0], 1))
                         if norm_fac is None:
                             norm_fac = nd.zeros_like(f[i][j])
@@ -88,7 +89,7 @@ class MATransfer(gl.nn.Block):
             # global
             norm_fac = None
             for i in range(self.slots):
-                f[-1][i] = nd.sum(self.f_rec_global(inputs[-1]) * self.f_emit_local(inputs[i]), axis=1)
+                f[-1][i] = nd.sum(self.f_rec_global(inputs[-1]) * self.f_emit_local2global(inputs[i]), axis=1)
                 f[-1][i] = nd.exp(f[-1][i]).reshape((f[-1][i].shape[0], 1))
                 if norm_fac is None:
                     norm_fac = nd.zeros_like(f[-1][i])
@@ -211,6 +212,16 @@ class MultiAgentNetwork(gl.nn.Block):
             self.global_dimension = [(6, 250), (468, 566), (586, 636)]
             self.input_dimension = 636
             self.global_input_dimension = (636 - 586) + (566 - 468) + (250 - 6)
+        elif self.domain_string == 'CamRestaurants':
+            self.slots = ['area', 'food', 'pricerange']
+            self.slot_dimension = {
+                'food': (0, 93),
+                'pricerange': (93, 98),
+                'area': (213, 220)
+            }
+            self.global_dimension = [(98, 213), (220, 268)]
+            self.input_dimension = 268
+            self.global_input_dimension = (213 - 98) + (268 - 220)
         else:
             raise ValueError
 
