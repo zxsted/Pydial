@@ -1,6 +1,6 @@
 python ../pydial.py plot \
 _benchmark_dqn_logs/*train* \
 _benchmark_gp_logs/*train* \
-_madqn_tau_sort_4020_0100_250100_0100_logs/*train* \
-_madqn_tau_nodrop_sort_4020_250100_logs/*train* \
-_madqn_tau_nodrop_sort_recurrent_323232_128128128_logs/*train*
+_madqn_tau_nodrop_sort_noinco_nl_4020_250100_logs/*train* \
+_env1_madqn_tau_nodrop_sort_noinco_4020_250100_logs/*train* \
+_benchmark_enac_logs/*train*
