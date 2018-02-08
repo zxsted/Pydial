@@ -61,6 +61,7 @@ from Policy import TerminalAction, TerminalState
 
 logger = utils.ContextLogger.getLogger('')
 
+
 # --- for flattening the belief --- #
 def flatten_belief(belief, domainUtil, merge=False):
     belief = belief.getDomainState(domainUtil.domainString)
@@ -321,9 +322,9 @@ class DQNPolicy(Policy.Policy):
         if cfg.has_option('dqnpolicy', 'madqn_non_local_mode'):
             self.madqn_non_local_mode = cfg.getboolean('dqnpolicy', 'madqn_non_local_mode')
 
-        self.madqn_non_local_block = False
-        if cfg.has_option('dqnpolicy', 'madqn_non_local_block'):
-            self.madqn_non_local_block = cfg.getboolean('dqnpolicy', 'madqn_non_local_block')
+        self.madqn_block_mode = False
+        if cfg.has_option('dqnpolicy', 'madqn_block_mode'):
+            self.madqn_block_mode = cfg.getboolean('dqnpolicy', 'madqn_block_mode')
 
         self.training_frequency = 2
         if cfg.has_option('dqnpolicy', 'training_frequency'):
@@ -466,7 +467,7 @@ class DQNPolicy(Policy.Policy):
                                     dropout_regularizer=self.madqn_dropout_regularizer,
                                     weight_regularizer=self.madqn_weight_regularizer,
                                     non_local_mode=self.madqn_non_local_mode,
-                                    non_local_block=self.madqn_non_local_block)
+                                    block_mode=self.madqn_block_mode)
 
         # when all models are defined, init all variables
         # init_op = tf.global_variables_initializer()
@@ -494,7 +495,6 @@ class DQNPolicy(Policy.Policy):
             return 188
         else:
             print 'DOMAIN {} SIZE NOT SPECIFIED, PLEASE DEFINE n_in'.format(domain_string)
-
 
     def act_on(self, state, hyps=None):
         if self.lastSystemAction is None and self.startwithhello:
