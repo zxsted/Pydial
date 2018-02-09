@@ -16,7 +16,7 @@ class MATransfer(gl.nn.Block):
     def __init__(self, slots, local_in_units, local_units, local_dropout,
                  global_in_units, global_units, global_dropout, activation,
                  concrete_share_rate, dropout_regularizer, use_comm=True,
-                 non_local_mode=False, block_mode=False):
+                 non_local_mode=False, block_mode=False, slots_comm=True):
         gl.nn.Block.__init__(self)
         self.slots = slots
         self.use_comm = use_comm
@@ -28,14 +28,16 @@ class MATransfer(gl.nn.Block):
         self.dropout_regularizer = dropout_regularizer
         self.non_local_mode = non_local_mode
         self.block_mode = block_mode
+        self.slots_comm = slots_comm
 
         with self.name_scope():
             if self.non_local_mode is False:
                 self.local_share_trans = gl.nn.Dense(in_units=local_in_units, units=local_units, activation=activation)
                 self.global_trans = gl.nn.Dense(in_units=global_in_units, units=global_units, activation=activation)
                 if self.use_comm:
-                    self.local2local_share_comm = gl.nn.Dense(
-                        in_units=local_in_units, units=local_units, activation=activation)
+                    if self.slots_comm:
+                        self.local2local_share_comm = gl.nn.Dense(
+                            in_units=local_in_units, units=local_units, activation=activation)
                     self.local2global_comm = gl.nn.Dense(in_units=local_in_units, units=global_units, activation=activation)
                     self.global2local_comm = gl.nn.Dense(in_units=global_in_units, units=local_units, activation=activation)
                 self.local_private_trans = []
@@ -45,7 +47,7 @@ class MATransfer(gl.nn.Block):
                     self.local_private_trans.append(gl.nn.Dense(
                         in_units=local_in_units, units=local_units, activation=activation))
                     self.register_child(self.local_private_trans[-1])
-                    if self.use_comm:
+                    if self.use_comm and self.slots_comm:
                         self.local2local_private_comm.append(gl.nn.Dense(
                             in_units=local_in_units, units=local_units, activation=activation))
                         self.register_child(self.local2local_private_comm[-1])
@@ -62,7 +64,8 @@ class MATransfer(gl.nn.Block):
                 self.g_local2local = gl.nn.Dense(in_units=local_in_units, units=local_units, use_bias=False)
                 self.g_global2local = gl.nn.Dense(in_units=global_in_units, units=local_units, use_bias=False)
                 self.g_local2global = gl.nn.Dense(in_units=local_in_units, units=global_units, use_bias=False)
-                self.f_emit_local2local = gl.nn.Dense(in_units=local_in_units, units=mid_units, use_bias=False)
+                if self.slots_comm:
+                    self.f_emit_local2local = gl.nn.Dense(in_units=local_in_units, units=mid_units, use_bias=False)
                 self.f_emit_local2global = gl.nn.Dense(in_units=local_in_units, units=mid_units, use_bias=False)
                 self.f_rec_local = gl.nn.Dense(in_units=local_in_units, units=mid_units, use_bias=False)
                 self.f_rec_global = gl.nn.Dense(in_units=global_in_units, units=mid_units, use_bias=False)
@@ -82,16 +85,17 @@ class MATransfer(gl.nn.Block):
             # local
             for i in range(self.slots):
                 norm_fac = None
-                for j in range(self.slots):
-                    if i != j:
-                        f[i][j] = nd.sum(self.f_rec_local(inputs[i]) * self.f_emit_local2local(inputs[j]), axis=1)
-                        f[i][j] = nd.exp(f[i][j]).reshape((f[i][j].shape[0], 1))
-                        if norm_fac is None:
-                            norm_fac = nd.zeros_like(f[i][j])
-                        norm_fac = norm_fac + f[i][j]
-                for j in range(self.slots):
-                    if i != j:
-                        results[i] = results[i] + (1. / norm_fac) * f[i][j] * self.g_local2local(inputs[j])
+                if self.slots_comm:
+                    for j in range(self.slots):
+                        if i != j:
+                            f[i][j] = nd.sum(self.f_rec_local(inputs[i]) * self.f_emit_local2local(inputs[j]), axis=1)
+                            f[i][j] = nd.exp(f[i][j]).reshape((f[i][j].shape[0], 1))
+                            if norm_fac is None:
+                                norm_fac = nd.zeros_like(f[i][j])
+                            norm_fac = norm_fac + f[i][j]
+                    for j in range(self.slots):
+                        if i != j:
+                            results[i] = results[i] + (1. / norm_fac) * f[i][j] * self.g_local2local(inputs[j])
                 results[i] = results[i] + self.g_global2local(inputs[-1])
 
             # global
@@ -173,8 +177,9 @@ class MATransfer(gl.nn.Block):
             mean_vec = mean_vec / float(self.slots)
 
             for i in range(self.slots):
-                results[i] = results[i] + self.local2local_share_comm(local_share_vec[i] * mean_vec) + \
-                             self.local2local_private_comm[i](local_private_vec[i] * mean_vec)
+                if self.slots_comm:
+                    results[i] = results[i] + self.local2local_share_comm(local_share_vec[i] * mean_vec) + \
+                                 self.local2local_private_comm[i](local_private_vec[i] * mean_vec)
                 results[i] = results[i] + self.global2local_comm(inputs[-1])
             results[-1] = results[-1] + self.local2global_comm(mean_vec)
             # for i in range(self.slots):
@@ -203,7 +208,7 @@ class MultiAgentNetwork(gl.nn.Block):
     def __init__(self, domain_string, hidden_layers, local_hidden_units, local_dropouts,
                  global_hidden_units, global_dropouts, private_rate, sort_input_vec,
                  share_last_layer, recurrent_mode, input_comm, concrete_share_rate, dropout_regularizer,
-                 non_local_mode, block_mode, **kwargs):
+                 non_local_mode, block_mode, slots_comm, **kwargs):
         gl.nn.Block.__init__(self, **kwargs)
 
         self.domain_string = domain_string
@@ -267,6 +272,7 @@ class MultiAgentNetwork(gl.nn.Block):
         self.dropout_regularizer = dropout_regularizer
         self.non_local_mode = non_local_mode
         self.block_mode = block_mode
+        self.slots_comm = slots_comm
 
         with self.name_scope():
             if self.sort_input_vec is False:
@@ -281,6 +287,7 @@ class MultiAgentNetwork(gl.nn.Block):
                                 units=self.global_hidden_units[0], activation='relu')
                 self.register_child(self.input_trans['global'])
             else:
+                print 'input_comm:', input_comm
                 self.input_trans = MATransfer(
                     slots=len(self.slots),
                     local_in_units=22,
@@ -310,7 +317,8 @@ class MultiAgentNetwork(gl.nn.Block):
                         concrete_share_rate=self.conrete_share_rate,
                         dropout_regularizer=self.dropout_regularizer,
                         non_local_mode=self.non_local_mode,
-                        block_mode=self.block_mode
+                        block_mode=self.block_mode,
+                        slots_comm=self.slots_comm
                     ))
                     self.register_child(self.ma_trans[-1])
             else:
@@ -331,7 +339,8 @@ class MultiAgentNetwork(gl.nn.Block):
                     concrete_share_rate=self.conrete_share_rate,
                     dropout_regularizer=self.dropout_regularizer,
                     non_local_mode=self.non_local_mode,
-                    block_mode=self.block_mode
+                    block_mode=self.block_mode,
+                    slots_comm=self.slots_comm
                 )
 
             if self.share_last_layer is False:
@@ -426,7 +435,7 @@ class DeepQNetwork(object):
                  sort_input_vec=None, share_last_layer=None, recurrent_mode=None,
                  input_comm=None, target_explore=None, concrete_share_rate=None,
                  dropout_regularizer=None, weight_regularizer=None,
-                 non_local_mode=None, block_mode=None):
+                 non_local_mode=None, block_mode=None, slots_comm=None):
         self.domain_string = domain_string
         self.s_dim = state_dim
         self.a_dim = action_dim
@@ -449,6 +458,7 @@ class DeepQNetwork(object):
         self.dropout_regularizer = dropout_regularizer
         self.non_local_mode = non_local_mode
         self.block_mode = block_mode
+        self.slots_comm = slots_comm
 
         self.qnet = self.create_ddq_network(prefix='qnet_')
         self.target = self.create_ddq_network(prefix='target_')
@@ -472,6 +482,7 @@ class DeepQNetwork(object):
                                     dropout_regularizer=self.dropout_regularizer,
                                     non_local_mode=self.non_local_mode,
                                     block_mode=self.block_mode,
+                                    slots_comm=self.slots_comm,
                                     prefix=prefix)
         # print network.collect_params()
         # exit(0)
